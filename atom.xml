@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[My Notes]]></title>
+  <link href="http://vkostyukov.github.com/atom.xml" rel="self"/>
+  <link href="http://vkostyukov.github.com/"/>
+  <updated>2013-01-19T13:12:12+07:00</updated>
+  <id>http://vkostyukov.github.com/</id>
+  <author>
+    <name><![CDATA[Vladimir Kostyukov]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress Power]]></title>
+    <link href="http://vkostyukov.github.com/blog/2013/01/19/octopress-power/"/>
+    <updated>2013-01-19T13:10:00+07:00</updated>
+    <id>http://vkostyukov.github.com/blog/2013/01/19/octopress-power</id>
+    <content type="html"><![CDATA[<p>Hello!</p>
+]]></content>
+  </entry>
+  
+</feed>
