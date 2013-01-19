@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vladimir & Julia Wedding!</title>
+  <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+  <script src="http://code.jquery.com/jquery-latest.min.js"> </script>
+  <script src="assets/js/jquery.countdown.min.js" /> </script>
+  <style>
+    .content {
+      margin-top: 24%;
+    }
+    h1 {
+      font-size: 34px;
+    }
+    h6 {
+      font-size: 14px;
+    }
+    .cntSeparator {
+      font-size: 48px;
+      margin: 25px 7px;
+      color: #000;
+    }
+    .desc { margin: 7px 3px; }
+    .desc div {
+      float: left;
+      font-family: Arial;
+      width: 70px;
+      margin-right: 65px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #000;
+    }
+  </style>
+  <script>
+    $(function() {
+      $('#timer').countdown({
+        image: "assets/img/digits.png",
+        startTime: new Date("29 Sep 2012, 10:25")
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <div class="row">
+        <div class="span4 offset4">
+          <center>
+            <h1> 29/09/2012 </h1>
+            <h6> save the date </h6>
+          </center>
+        </div>
+      </div>
+      <br /> <br />
+      <center>
+        <div id="timer" style="padding-left: 24%;"> </div>
+      </center>
+    </div>
+  </div>
+</body>
+</html>
