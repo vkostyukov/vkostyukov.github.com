@@ -1,25 +1,9 @@
-%% Copyright 2013 BarD Software s.r.o
-%
-% This work may be distributed and/or modified under the
-% conditions of the LaTeX Project Public License version 1.3c,
-% available at http://www.latex-project.org/lppl/.
-
-% === Стандартный moderncv и стандартные темы ===
-% === Компилируются pdflatex'ом               ===
-% \documentclass[11pt,a4paper]{moderncv}
-% \moderncvtheme[grey]{classic}
-% \usepackage[utf8]{inputenc}
-% \usepackage[T2A]{fontenc}
-% \usepackage[english,russian]{babel}
-
-% === moderncv модифицированный для использования с XeLaTeX и фирменная тема ===
 \documentclass[11pt,a4paper]{moderncv-xetex}
 \moderncvtheme[grey]{papeeria}
 
 \usepackage{xcolor}
 \usepackage[a4paper,margin=1in]{geometry}
 
-% Шапка
 \firstname{Vladimir}\familyname{Kostyukov}
 \title{Compiler Engineer}
 \mobile{+7(923)1319766}
@@ -35,14 +19,12 @@
 \begin{document}
 \maketitle
 
-% Т
 \section{Summary}
 \cvline{}{\emph{Software Engineer} with 3 years of experience developing compilers and VMs.
 Creative and passionate programmer with in-depth knowledges of managed runtimes and compilers.
 Excellent Java and C/C++ programming skills allied with experience in performance analysis and benchmarking.
 }
 
-% ТЕХНИЧЕСКИЕ НАВЫКИ -------------------------------------------------
 \section{Skills}
 \cvline{Programming Languages}{Fluent in \emph{Java} and \emph{Scala}\newline
 Efficient in \emph{C/C++}\newline
@@ -50,7 +32,6 @@ Knowledges in \emph{JavaScript}, \emph{Python}, \emph{Perl}
 }
 \cvline{Scopes}{Programming Languages Design and Implementation, Performance Analysis, Object Oriented Programming, Functional Programming, Purely Functional Data Structures, Design and Analysis of Algorithms}
 
-% ОПЫТ РАБОТЫ --------------------------------------------------------
 \section{Experience}
 \cventry{2011/04 -- ...}{\textbf{Software Engineer}}{\href{http://intel.com}{Intel Corporation}}{Novosibirsk}{Russia}
     {I am a member of the \textbf{Managed Runtimes} team. My first project there was development (from scratch) a proof of concept
@@ -100,7 +81,6 @@ Knowledges in \emph{JavaScript}, \emph{Python}, \emph{Perl}
 \cventry{Functional Programming}{A Functional Approach to Standard Binary Heaps, 2013}
         {\href{http://arxiv.org/abs/1312.4666}{arXiv:1312.4666}}{}{}{}
 
-% ОБРАЗОВАНИЕ --------------------------------------------------------
 \section{Education}
 \cventry{2006\,--\,2011}{\textbf{Master of Science} in CS}{\href{http://en.altstu.ru}{Altai State Technical University}}{Barnaul}{}
   {Master's thesis: \emph{"Distributed monitoring and dispatching system of the processes in heterogenous environment"}.\newline
