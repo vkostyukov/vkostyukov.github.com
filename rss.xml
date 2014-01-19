@@ -8,16 +8,15 @@
     <title>Vladimir Kostyukov</title>
     <link>http://vkostyukov.ru</link>
     <description>Technical Blog</description>
-    <pubDate>Sun, 10 Nov 2013 10:18:00 -0000</pubDate>
+    <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
     <item>
-      <title>Welcome to Jekyll!</title>
-      <link>http://vkostyukov.ru/posts/welcome-to-jekyll</link>
-      <description>&lt;p&gt;You&amp;#39;ll find this post in your &lt;code&gt;_posts&lt;/code&gt; directory - edit this post and re-build (or run with the &lt;code&gt;-w&lt;/code&gt; switch) to see your changes!
-To add new posts, simply add a file in the &lt;code&gt;_posts&lt;/code&gt; directory that follows the convention: YYYY-MM-DD-name-of-post.ext.&lt;/p&gt;
+      <title>In the beginning</title>
+      <link>http://vkostyukov.ru/posts/in-the-beginning</link>
+      <description>&lt;p&gt;This is my first post on this blog.&lt;/p&gt;
 </description>
-      <pubDate>Sun, 10 Nov 2013 10:18:00 -0000</pubDate>
-      <dc:date>2013-11-10T10:18:00Z</dc:date>
+      <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
+      <dc:date>2014-01-19T10:00:00Z</dc:date>
     </item>
-    <dc:date>2013-11-10T10:18:00Z</dc:date>
+    <dc:date>2014-01-19T10:00:00Z</dc:date>
   </channel>
 </rss>
