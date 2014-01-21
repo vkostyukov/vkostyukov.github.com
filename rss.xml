@@ -10,9 +10,9 @@
     <description>Technical Blog</description>
     <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
     <item>
-      <title>In the beginning</title>
+      <title>In The Beginning</title>
       <link>http://vkostyukov.ru/posts/in-the-beginning</link>
-      <description>&lt;p&gt;This is my first post on this blog.&lt;/p&gt;
+      <description>&lt;p&gt;This is my first post on this blog. Needles to say, I&amp;#39;m really exited about this. This is my first attempt in writing blog posts in English. I was previously posting in Russian at &lt;a href=&quot;http://vkostyukov.livejournal.com&quot;&gt;LJ&lt;/a&gt; and &lt;a href=&quot;http://vkostyukov.tumblr.com&quot;&gt;Tumbler&lt;/a&gt;, but it wasn&amp;#39;t about technical things. Here, I will try to post only about CS. I have huge plans on posting about Scala and it&amp;#39;s application for research of purely functional data structures. I should probably post about algorithms and data structures that I&amp;#39;ve already implemented in &lt;a href=&quot;https://github.com/vkostyukov/scalacaster&quot;&gt;Scalacaster&lt;/a&gt;. There are loads of awesome pieces of Scala code that I want to tell. One of my favorites - &lt;a href=&quot;https://github.com/vkostyukov/scalacaster/blob/master/src/search/SelectionSearch.scala&quot;&gt;QuickSelect&lt;/a&gt; in a purely functional setting.&lt;/p&gt;
 </description>
       <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
       <dc:date>2014-01-19T10:00:00Z</dc:date>
