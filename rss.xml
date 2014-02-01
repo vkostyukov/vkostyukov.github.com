@@ -12,7 +12,7 @@
     <item>
       <title>Finagle Your Fibonacci Calculation</title>
       <link>http://vkostyukov.ru/posts/finagle-your-fibonacci-calculation</link>
-      <description>&lt;p&gt;&lt;a href=&quot;http://twitter.github.io/finagle/&quot;&gt;Finagle&lt;/a&gt; is an RPC library for JVM that allows you to develop service-based applications in a protocol-agnostic way. Formally, the Finagle library provides both asynchronous runtime via &lt;a href=&quot;http://twitter.github.io/finagle/guide/Futures.html&quot;&gt;futures&lt;/a&gt; and protocol-independence via &lt;a href=&quot;http://twitter.github.io/finagle/guide/ServerAnatomy.html&quot;&gt;codecs&lt;/a&gt;. In this post I will try to build a Finagle-powered distributed &lt;a href=&quot;http://en.wikipedia.org/wiki/Fibonacci_number&quot;&gt;Fibonacci Numbers&lt;/a&gt; calculator that can scale up to thousands of nodes.&lt;/p&gt;
+      <description>&lt;p&gt;&lt;a href=&quot;http://twitter.github.io/finagle/&quot;&gt;Finagle&lt;/a&gt; is an RPC library for JVM that allows you to develop service-based applications in a protocol-agnostic way. Formally, the Finagle library provides both asynchronous runtime via &lt;a href=&quot;http://twitter.github.io/finagle/guide/Futures.html&quot;&gt;futures&lt;/a&gt; and protocol-independence via &lt;a href=&quot;http://twitter.github.io/finagle/guide/ServerAnatomy.html&quot;&gt;codecs&lt;/a&gt;. In this post I will try to build a Finagle-powered distributed &lt;a href=&quot;http://en.wikipedia.org/wiki/Fibonacci_number&quot;&gt;Fibonacci Numbers&lt;/a&gt; calculator that scales up to thousands of nodes.&lt;/p&gt;
 </description>
       <pubDate>Sat, 01 Feb 2014 10:00:00 -0000</pubDate>
       <dc:date>2014-02-01T10:00:00Z</dc:date>
