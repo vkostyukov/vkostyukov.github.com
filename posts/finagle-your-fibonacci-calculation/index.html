@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>   
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <title>Vladimir Kostyukov - Technical Blog</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css" />
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+    <!-- This is for syntax highlight -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/syntax.css">
+    <!-- Customisation  -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/main.css" />
+
+</head>
+<body class="home-template">
+
+    
+    <header class="site-head">
+    <div class="vertical">
+        <div class="site-head-content" class="inner">
+            
+                <a class="blog-logo" href="http://vkostyukov.ru">
+                    <img src="http://vkostyukov.ru/assets/images/header.png" alt="Vladimir Kostyukov" />
+                </a>
+            
+        </div>
+    </div>
+</header>
+
+<main class="content" role="main">
+    <article class="post">
+<!--
+        <header class="post-header">
+            <a id="blog-logo" href="/">
+                
+                    <img src="http://vkostyukov.ru/assets/images/header.png" alt="Vladimir Kostyukov" />
+                 
+            </a>
+        </header>
+-->  
+        <span class="post-meta">
+            <time datetime="2014-02-01">01 Feb 2014</time>
+            
+                on
+                
+                    scala,
+                
+                    finagle
+                
+            
+       	</span>
+
+        <h2 class="post-title">Finagle Your Fibonacci Calculation</h2>
+
+        <section class="post-content">
+            <p><a href="http://twitter.github.io/finagle/">Finagle</a> is an RPC library for JVM that allows you to develop service-based applications in a protocol-agnostic way. Formally, the Finagle library provides both asynchronous runtime via <a href="http://twitter.github.io/finagle/guide/Futures.html">futures</a> and protocol-independence via <a href="http://twitter.github.io/finagle/guide/ServerAnatomy.html">codecs</a>. In this post I will try to build a Finagle-powered distributed <a href="http://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci Numbers</a> calculator that can scale up to thousands of nodes.</p>
+
+<h3>Topology Design</h3>
+
+<p>Lets start with the requirements. At the first glance, we might want to see our system both <a href="http://en.wikipedia.org/wiki/Fault_tolerance">fault-tolerant</a> and <a href="http://en.wikipedia.org/wiki/Scalability">scalable</a>. These are the typical requirements for any kind of distributed system. And the good news here, Finagle provides a corresponding set of building blocks and mechanisms (such as load balancing, retrying, monitoring, etc.) that allows the developer easily write a <em>reusable</em> scalable and fault-tolerant code without a particulate knowledge about concrete protocols.</p>
+
+<p>Anyway, such things like scalability should be done at some different level then framework or library level. The systems should be scalable by design not by any fancy tool. Thus, we must remember it at any stage of application life-cycle.</p>
+
+<p>In order to design the scalable system we have to understand the problem we&#39;re trying to solve. The classic Fibonacci calculation algorithm builds a recursive tree with height <code>O(n)</code> and branching factor <code>2</code>. Thus, the most natural and suitable <a href="http://www.openp2p.com/pub/a/p2p/2002/01/08/p2p_topologies_pt2.html">service topology</a> we can use here is a hierarchical one. The hierarchical or tree-based topology satisfy both scalability and fault-tolerance requirements. So, the distributed Fibonacci calculator might be viewed as following</p>
+
+<p><img src="http://vkostyukov.ru/assets/images/fibonacci-design.png" alt="High-Level Design"></p>
+
+<p>In other words, we simply maps every node from the recursive tree (the algorithm&#39;s abstraction) to physical/distributed nodes. The proposed topology tree has two kind of nodes - <em>leaf</em> nodes with label <code>W</code> (workers) and <em>branch</em> nodes with label <code>F</code> (<a href="http://en.wikipedia.org/wiki/Fan-out">fanouts</a>). The worker node is our workhorse that does all the magic, while the fanout node doesn&#39;t really perform calculation but implements <em>map-reduce</em> approach by delegating the sub-problems to child nodes. The number of nodes in such tree is unlimited, but doesn&#39;t really make sense having workers more than a number of logical cores in your CPU. For example, a suitable configuration for a typical <a href="http://en.wikipedia.org/wiki/Haswell_(microarchitecture)">Haswell</a> laptop with four logical cores looks exactly like the picture above.</p>
+
+<h3>Finagle Power</h3>
+
+<p>The Finagle&#39;s API provides three robust building blocks: <a href="http://twitter.github.io/finagle/guide/Futures.html">futures</a>, <a href="http://twitter.github.io/finagle/guide/ServicesAndFilters.html">filers and services</a>. All the building blocks are designed to be composable in a very neat way. Thus, keeping in mind that futures are single-element <em>immutable containers</em> while services and filters are <em>just functions</em>, it&#39;s really simple to reason about Finagle-powered code.</p>
+
+<p>Finagle is a <em>service-oriented</em> platform. So, all the interactions between servers and clients are built around services. Servers implements their behavior via services, while clients interacts with servers via services. Finally, service is just a function that takes type <code>A</code> and returns a future of type <code>B</code>.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">trait</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">A</span>, <span class="kt">B</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">A</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The <code>Future</code> type represents a placeholder for a response being sent from server. Programming with futures is an  asynchronous programming discipline that relies on transforming values rather than reasoning about sequence of events and callbacks.</p>
+
+<p>The last but not least thing to discuss - Finagle&#39;s filters, which are actually <a href="http://en.wikipedia.org/wiki/Decorator_pattern"><em>decorators</em></a> for services. Filters allow to change the behavior of services at running time as well as to change their types and get some benefits from Scala&#39;s type checker at compile time.</p>
+
+<h3>Abstractions</h3>
+
+<p>Lets start with a cornerstone abstraction - a Fibonacci calculator that takes a <code>BigInt</code> number of Fibonacci member and returns a future of the its value. It also a good idea to predefine a useful <code>BigInt</code> values in the same trait.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">trait</span> <span class="nc">FibonacciCalculator</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="nc">Zero</span> <span class="k">=</span> <span class="nc">BigInt</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nc">One</span> <span class="k">=</span> <span class="nc">BigInt</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nc">Two</span> <span class="k">=</span> <span class="nc">BigInt</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">calculate</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">BigInt</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">BigInt</span><span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>Now we can define a worker node implementation that uses a <a href="http://stackoverflow.com/questions/19045936/scalas-for-comprehension-with-futures">for comprehension</a> for future pipelining (<em>sequential composition</em>). The straightforward implementation looks exactly like the classic recursive algorithm:</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">object</span> <span class="nc">LocalFibonacciCalculator</span> <span class="k">extends</span> <span class="nc">FibonacciCalculator</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">calculate</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">BigInt</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">BigInt</span><span class="o">]</span> <span class="k">=</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">n</span><span class="o">.</span><span class="n">equals</span><span class="o">(</span><span class="nc">Zero</span><span class="o">)</span> <span class="o">||</span> <span class="n">n</span><span class="o">.</span><span class="n">equals</span><span class="o">(</span><span class="nc">One</span><span class="o">))</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">n</span><span class="o">)</span>
+    <span class="k">else</span> <span class="k">for</span> <span class="o">{</span> <span class="n">a</span> <span class="k">&lt;-</span> <span class="n">calculate</span><span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="nc">One</span><span class="o">)</span>
+               <span class="n">b</span> <span class="k">&lt;-</span> <span class="n">calculate</span><span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="nc">Two</span><span class="o">)</span> <span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>Thus, the fanout node implementation might be defined as following</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">class</span> <span class="nc">FanoutFibonacciCalculator</span><span class="o">(</span>
+  <span class="n">left</span><span class="k">:</span> <span class="kt">FibonacciCalculator</span><span class="o">,</span>
+  <span class="n">right</span><span class="k">:</span> <span class="kt">FibonacciCalculator</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">FibonacciCalculator</span> <span class="o">{</span>
+  
+  <span class="k">def</span> <span class="n">calculate</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">BigInt</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">BigInt</span><span class="o">]</span> <span class="k">=</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">n</span><span class="o">.</span><span class="n">equals</span><span class="o">(</span><span class="nc">Zero</span><span class="o">)</span> <span class="o">||</span> <span class="n">n</span><span class="o">.</span><span class="n">equals</span><span class="o">(</span><span class="nc">One</span><span class="o">))</span> <span class="nc">Future</span><span class="o">.</span><span class="n">value</span><span class="o">(</span><span class="n">n</span><span class="o">)</span>
+    <span class="k">else</span> <span class="o">{</span>
+      <span class="k">val</span> <span class="n">seq</span> <span class="k">=</span> <span class="nc">Seq</span><span class="o">(</span><span class="n">left</span><span class="o">.</span><span class="n">calculate</span><span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="nc">One</span><span class="o">),</span> <span class="n">right</span><span class="o">.</span><span class="n">calculate</span><span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="nc">Two</span><span class="o">))</span>
+      <span class="nc">Future</span><span class="o">.</span><span class="n">collect</span><span class="o">(</span><span class="n">seq</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="k">_</span><span class="o">.</span><span class="n">sum</span> <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The fanout calculator uses a <em>concurrent compositor</em> <code>Future.collect()</code> (which takes the sequence of futures and returns the future of sequences) in order to process the left and right sub-trees in parallel. The last future transformation that is performed by fanout calculator is summing up the sequence.</p>
+
+<p>In our system, we will use the String-based transport layer provided by Finagle&#39;s example of <a href="http://twitter.github.io/finagle/guide/ServerAnatomy.html">Echo Server</a>, which means we need to provide a suitable <em>adapter</em> implementation that adapts the String-based service <code>Service[String, String]</code> to <code>FibonacciCalculator</code> interface. This will allow us to use remote workers as fanout node&#39;s children.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">class</span> <span class="nc">RemoteFibonacciCalculator</span><span class="o">(</span><span class="n">remote</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span> 
+    <span class="k">extends</span> <span class="nc">FibonacciCalculator</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="n">calculate</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">BigInt</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">BigInt</span><span class="o">]</span> <span class="k">=</span> 
+    <span class="n">remote</span><span class="o">(</span><span class="n">n</span><span class="o">.</span><span class="n">toString</span><span class="o">)</span> <span class="n">map</span> <span class="o">{</span> <span class="nc">BigInt</span><span class="o">(</span><span class="k">_</span><span class="o">)</span> <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>Good news here is that <code>BigInt</code> can be converted to the <code>String</code> (and vice versa) out-of-the box, so we can easily perform the conversion in one line.</p>
+
+<p>Now we&#39;re ready to setup our service that takes a Fibonacci calculator and delegates the clients&#39; requests to it. Also, a bit of type conversions should be done here. The <code>FibonacciServie</code> can be treated as an <em>adapter</em> of <code>FibonacciCalculator</code> to <code>Service</code> interface.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">class</span> <span class="nc">FibonacciService</span><span class="o">(</span><span class="n">calculator</span><span class="k">:</span> <span class="kt">FibonacciCalculator</span><span class="o">)</span> 
+    <span class="k">extends</span> <span class="nc">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span>
+    <span class="n">calculator</span><span class="o">.</span><span class="n">calculate</span><span class="o">(</span><span class="nc">BigInt</span><span class="o">(</span><span class="n">req</span><span class="o">))</span> <span class="n">map</span> <span class="o">{</span> <span class="k">_</span><span class="o">.</span><span class="n">toString</span> <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<h3>Server and Client Configurations</h3>
+
+<p>Finally, we can define a server that handles our Fibonacci service. The launcher should allow the user to run either the worker node or fanout node by specifying the corresponding command line options. The complete implementation looks like following:</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">object</span> <span class="nc">FibonacciServerLauncher</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="o">.</span><span class="n">toSeq</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="n">args</span> <span class="k">match</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;leaf&quot;</span><span class="o">,</span> <span class="n">port</span><span class="o">)</span> <span class="k">=&gt;</span>
+      <span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">FibonacciService</span><span class="o">(</span><span class="nc">LocalFibonacciCalculator</span><span class="o">)</span>
+      <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="nc">FibonacciServer</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">port</span><span class="o">,</span> <span class="n">service</span><span class="o">))</span>
+    <span class="k">case</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">&quot;node&quot;</span><span class="o">,</span> <span class="n">port</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">)</span> <span class="k">=&gt;</span>
+      <span class="c1">// remote services </span>
+      <span class="k">val</span> <span class="n">ls</span> <span class="k">=</span> <span class="nc">FibonacciClient</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:&quot;</span> <span class="o">+</span> <span class="n">left</span><span class="o">)</span>
+      <span class="k">val</span> <span class="n">rs</span> <span class="k">=</span> <span class="nc">FibonacciClient</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:&quot;</span> <span class="o">+</span> <span class="n">right</span><span class="o">)</span>
+
+      <span class="c1">// remote calculators</span>
+      <span class="k">val</span> <span class="n">lc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">RemoteFibonacciCalculator</span><span class="o">(</span><span class="n">ls</span><span class="o">)</span>
+      <span class="k">val</span> <span class="n">rc</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">RemoteFibonacciCalculator</span><span class="o">(</span><span class="n">rs</span><span class="o">)</span>
+
+      <span class="c1">// a fanout</span>
+      <span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">FibonacciService</span><span class="o">(</span><span class="k">new</span> <span class="nc">FanoutFibonacciCalculator</span><span class="o">(</span><span class="n">lc</span><span class="o">,</span> <span class="n">rc</span><span class="o">))</span>
+      <span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="nc">FibonacciServer</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">port</span><span class="o">,</span> <span class="n">service</span><span class="o">))</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The client launcher looks much simpler though:</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">object</span> <span class="nc">FibonacciClientLauncher</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="o">.</span><span class="n">toSeq</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="n">args</span> <span class="k">match</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="nc">Seq</span><span class="o">(</span><span class="n">port</span><span class="o">,</span> <span class="n">req</span><span class="o">)</span> <span class="k">=&gt;</span>
+      <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">FibonacciClient</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:&quot;</span> <span class="o">+</span> <span class="n">port</span><span class="o">)</span>
+      <span class="k">val</span> <span class="n">rep</span> <span class="k">=</span> <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">client</span><span class="o">(</span><span class="n">req</span><span class="o">))</span>
+      <span class="n">printf</span><span class="o">(</span><span class="s">&quot;Fibonacci(%s) is %s\n&quot;</span><span class="o">,</span> <span class="n">req</span><span class="o">,</span> <span class="n">rep</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="n">println</span><span class="o">(</span><span class="s">&quot;Bad arguments!&quot;</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The complete source code of both client and server are available <a href="https://github.com/vkostyukov/finagle-fibonacci">at GitHub</a>.</p>
+
+<p>Now, it&#39;s time to build the topology from the first picture (the binary three with seven nodes). The following script builds the tree in a <em>bottom-up</em> manner by launching a seven instances on the same machine.</p>
+
+<div class="highlight"><pre><code class="bash"><span class="nv">$ </span>sbt <span class="s2">&quot;run-main FibonacciServerLauncher leaf 2001&quot;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+  sbt <span class="s2">&quot;run-main FibonacciServerLauncher leaf 2002&quot;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+  sbt <span class="s2">&quot;run-main FibonacciServerLauncher node 2003 2002 2001&quot;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+  sbt <span class="s2">&quot;run-main FibonacciServerLauncher leaf 2004&quot;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+  sbt <span class="s2">&quot;run-main FibonacciServerLauncher leaf 2005&quot;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+  sbt <span class="s2">&quot;run-main FibonacciServerLauncher node 2006 2005 2004&quot;</span> <span class="o">&amp;&amp;</span> <span class="se">\</span>
+  sbt <span class="s2">&quot;run-main FibonacciServerLauncher node 2007 2006 2003&quot;</span>
+</code></pre></div>
+
+<p>From the client-side, system usage looks pretty simple. The client should interact with a root node of the topology tree. In our case, with an instance on port <code>2007</code>.</p>
+
+<p><img src="http://vkostyukov.ru/assets/images/fibonacci-usage.png" alt="System Usage"></p>
+
+<h3>Filters as Services&#39; Decorators</h3>
+
+<p>Filters provide a natural and clean way of changing the services&#39; behavior by chaining their requests through the number of nested filters. Thus, the same <em>protocol-independent</em> filters can be used at both server and client sides.</p>
+
+<p>Lets consider the example of filter that simply logs services&#39; requests to the console:</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">object</span> <span class="nc">LogStringFilter</span> <span class="k">extends</span> <span class="nc">Filter</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">String</span>, <span class="kt">String</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">service</span><span class="k">:</span> <span class="kt">Service</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="n">println</span><span class="o">(</span><span class="s">&quot;Got a request: &quot;</span> <span class="o">+</span> <span class="n">req</span><span class="o">)</span>
+    <span class="n">service</span><span class="o">(</span><span class="n">req</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>The filer can be applied to the service by <code>andThen</code> operator. In order to make workers dump their requests we can change the launcher configuration as follows:</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">val</span> <span class="n">service</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">FibonacciService</span><span class="o">(</span><span class="nc">LocalFibonacciCalculator</span><span class="o">)</span>
+<span class="nc">Await</span><span class="o">.</span><span class="n">ready</span><span class="o">(</span><span class="nc">FibonacciServer</span><span class="o">.</span><span class="n">serve</span><span class="o">(</span><span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">port</span><span class="o">,</span> <span class="nc">LogStringFilter</span> <span class="n">andThen</span> <span class="n">service</span><span class="o">))</span>
+</code></pre></div>
+
+<h3>Is it Scalable and Fault-Tolerant?</h3>
+
+<p>The suggested tree-based topology might be scaled in a <em>bottom-up</em> manner by adding new levels of fanout nodes. But, it&#39;s not that easy to configure the system with only shell commands described before. Any kind of specialized tools (like <a href="http://zookeeper.apache.org">ZooKeeper</a>, which is supported by Finagle) should be used instead.</p>
+
+<p>In order to make the system fault-tolerant, we can use Finagle&#39;s built-in <em>load balancers</em> as well as customized filters that implement <a href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/RetryingFilter.scala">retries</a> and <a href="https://github.com/twitter/finagle/blob/master/finagle-core/src/main/scala/com/twitter/finagle/service/TimeoutFilter.scala">timeouts</a>.</p>
+
+<p>For example, the following client service will be balancing its requests between two nodes <code>localhost:2001</code> and <code>localhost:2002</code>:</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">FibonacciClient</span><span class="o">.</span><span class="n">newService</span><span class="o">(</span><span class="s">&quot;localhost:2001,localhost:2002&quot;</span><span class="o">)</span>
+</code></pre></div>
+
+<h3>Further Improvements</h3>
+
+<p>It might be a good idea to replace the String-based transport layer with BigInt-based one. The suitable example of corresponding pipeline configurations with BigInt decoders and encoders can be found <a href="https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/factorial">at Netty&#39;s example directory</a>.</p>
+
+        </section>
+
+        
+
+        <footer class="post-footer">
+            <!-- If we want to display author's name and bio -->
+            
+                <section class="author">
+                    <header> <a href="/"> <img class="profile" src="/assets/images/profile.jpg" alt="Author's profile picture"></a></header>
+                    <article>
+                        <!-- Author Name -->
+                        <h4> Vladimir Kostyukov </h4>
+                        <!-- Author Bio -->
+                        <p> 
+                            Independent Researcher. Dependent Engineer.
+                            <br />
+                            Twitter: <a href="http://twitter.com/vkostyukov">@vkostyukov</a>, Blog: <a href="http://vkostyukov.ru">http://vkostyukov.ru</a>
+                        </p>
+                    </article>
+                </section>                
+            
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="http://twitter.com/share?text=Finagle Your Fibonacci Calculation&amp;url=http://vkostyukov.ru/posts/finagle-your-fibonacci-calculation"
+                    onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://vkostyukov.ru/posts/finagle-your-fibonacci-calculation"
+                    onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://vkostyukov.ru/posts/finagle-your-fibonacci-calculation"
+                   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+            
+            
+            <section class="disqus">
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+
+                    var disqus_shortname = 'vkostyukov'; 
+                    var disqus_developer = 0; // developer mode is on
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+            </section>
+            
+        </footer>
+    </article>
+</main>
+
+
+    <footer class="site-footer">
+        <a class="subscribe icon-feed" href="/rss.xml"><span class="tooltip">Subscribe!</span></a>
+        <div class="inner">
+             <section class="copyright">All content copyright <a href="/">Vladimir Kostyukov</a> &copy;  &bull; All rights reserved.</section>
+             <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+        </div>
+    </footer>
+
+    
+    <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+    <script type="text/javascript" src="/assets/js/index.js"></script>
+
+    <!-- Google Analytics Tracking code -->
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-XXXXXXXX-X']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>   
+</body>
+</html>

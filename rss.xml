@@ -8,15 +8,23 @@
     <title>Vladimir Kostyukov</title>
     <link>http://vkostyukov.ru</link>
     <description>Technical Blog</description>
-    <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
+    <pubDate>Sat, 01 Feb 2014 10:00:00 -0000</pubDate>
+    <item>
+      <title>Finagle Your Fibonacci Calculation</title>
+      <link>http://vkostyukov.ru/posts/finagle-your-fibonacci-calculation</link>
+      <description>&lt;p&gt;&lt;a href=&quot;http://twitter.github.io/finagle/&quot;&gt;Finagle&lt;/a&gt; is an RPC library for JVM that allows you to develop service-based applications in a protocol-agnostic way. Formally, the Finagle library provides both asynchronous runtime via &lt;a href=&quot;http://twitter.github.io/finagle/guide/Futures.html&quot;&gt;futures&lt;/a&gt; and protocol-independence via &lt;a href=&quot;http://twitter.github.io/finagle/guide/ServerAnatomy.html&quot;&gt;codecs&lt;/a&gt;. In this post I will try to build a Finagle-powered distributed &lt;a href=&quot;http://en.wikipedia.org/wiki/Fibonacci_number&quot;&gt;Fibonacci Numbers&lt;/a&gt; calculator that can scale up to thousands of nodes.&lt;/p&gt;
+</description>
+      <pubDate>Sat, 01 Feb 2014 10:00:00 -0000</pubDate>
+      <dc:date>2014-02-01T10:00:00Z</dc:date>
+    </item>
     <item>
       <title>In The Beginning</title>
       <link>http://vkostyukov.ru/posts/in-the-beginning</link>
-      <description>&lt;p&gt;This is my first post on this blog. Needless to say, I&amp;#39;m really excited about this. This is my first attempt in writing blog posts in English. I was previously posting in Russian at &lt;a href=&quot;http://vkostyukov.livejournal.com&quot;&gt;LJ&lt;/a&gt; and &lt;a href=&quot;http://vkostyukov.tumblr.com&quot;&gt;Tumbler&lt;/a&gt;, but it wasn&amp;#39;t about technical things. Here, I will try to post only about CS. I have huge plans on posting about Scala and it&amp;#39;s application for research of purely functional data structures. I should probably post about algorithms and data structures that I&amp;#39;ve already implemented in &lt;a href=&quot;https://github.com/vkostyukov/scalacaster&quot;&gt;Scalacaster&lt;/a&gt;. There are loads of awesome pieces of Scala code that I want to tell. One of my favorites - &lt;a href=&quot;https://github.com/vkostyukov/scalacaster/blob/master/src/search/SelectionSearch.scala&quot;&gt;QuickSelect&lt;/a&gt; in a purely functional setting.&lt;/p&gt;
+      <description>&lt;p&gt;This is my first post on this blog. Needless to say, I&amp;#39;m really excited about this. This is my first attempt in writing blog posts in English. I was previously posting in Russian at &lt;a href=&quot;http://vkostyukov.livejournal.com&quot;&gt;LJ&lt;/a&gt; and &lt;a href=&quot;http://vkostyukov.tumblr.com&quot;&gt;Tumbler&lt;/a&gt;, but it wasn&amp;#39;t about technical things. Here, I will try to post only about CS. I have huge plans on posting about Scala and it&amp;#39;s application for research of purely functional data structures. I should probably post about algorithms and data structures that I&amp;#39;ve already implemented in &lt;a href=&quot;https://github.com/vkostyukov/scalacaster&quot;&gt;Scalacaster&lt;/a&gt;. There are loads of awesome pieces of Scala code that I want to tell about. One of my favorites - &lt;a href=&quot;https://github.com/vkostyukov/scalacaster/blob/master/src/search/SelectionSearch.scala&quot;&gt;QuickSelect&lt;/a&gt; in a purely functional setting.&lt;/p&gt;
 </description>
       <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
       <dc:date>2014-01-19T10:00:00Z</dc:date>
     </item>
-    <dc:date>2014-01-19T10:00:00Z</dc:date>
+    <dc:date>2014-02-01T10:00:00Z</dc:date>
   </channel>
 </rss>
