@@ -1,0 +1,13 @@
+name: Vladimir Kostyukov
+description: "Technical Blog"
+meta_description: ""
+
+markdown: redcarpet
+pygments: true
+logo: assets/images/header.png
+paginate: 15
+permalink: /posts/:title
+
+# Details for the RSS feed generator
+url:            'http://vkostyukov.ru'
+author:         'Vladimir Kostyukov'
