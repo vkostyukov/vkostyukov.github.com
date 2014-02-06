@@ -80,15 +80,15 @@ That is a partially true. We usually don't care about constant factors in asympt
 
 The new time complexity gives us a shorter version of a recursive tree: `log_3 n` against `log_2 n`. In other words, it gives us a shorter stack trace as well as a smaller memory footprint (due to reduced number of the allocated stack frames). For example, for n = 2 147 483 647 (a maximum length of the array that might be allocated in JVM) we'll have a 40% shorter recursive tree. Isn't it awesome? Not really. To be honest, 40% is from difference between 31 and 19 (base `2` against base `3` in a logarithmic function). A logarithm is an awesome function! It takes a number and makes it smaller. I wish all the algorithms have had a logarithm in their asymptotic bounds.
 
-Well, what does it cost to make 31 recursive calls on a modern JVM (and a modern CPU as well)? I bet - _nothing_. And this might be a strong reason why we didn't study a dual-pivot binary search algorithm in a university course. Another reason is optimizing compilers (i.e., a [HotSpot JIT Compiler][9]) that can easily eliminate a [tail-recursion][8] by replacing it with a simple iterative loop. Thus, all the fictional benefits of using a dual-pivot binary search might be completely lost.
+Well, what does it cost to make 31 recursive calls on a modern JVM (and a modern CPU as well)? I bet - _nothing_. And this might be a strong reason why we didn't study a dual-pivot binary search algorithm in a university course. Another reason is optimizing compilers (i.e., a [HotSpot JIT Compiler][9]) that can easily eliminate a [tail-recursion][8] by replacing it with a simple iterative loop. Therefore, all the fictional benefits of using a dual-pivot binary search might be completely lost.
 
 Anyway, there is still an interesting part of a dual-pivot approach that wasn't discussed yet - a _number of comparisons_. Using a dual-pivot element introduces a different number of comparisons per recursive call: `4` (against `2` in a classic scheme), which doesn't sound optimistic, but still should be investigated. And the easiest way to check whether it's worth to use a dual-pivot scheme or not is to look at graphical representation of both functions: `2 log_2 n` and `4 log_3 n`.
 
 ![A chart]({{ site.url }}/assets/images/chart.png)
 
-The chart above shows that a dual-pivot scheme uses a bit more comparisons then a single-pivot one on the same input. More precisely, it uses 20% more comparisons then an original algorithm. Thus, a dual-pivot approach introduces both shorter recursive tree (less number of recursive call) but higher number of comparisons. 
+The chart above shows that a dual-pivot scheme uses a bit more comparisons then a single-pivot one on the same input. More precisely, it uses 20% more comparisons then an original algorithm. On the one hand, a dual-pivot approach introduces a shorter recursive tree (less number of recursive calls), but on the other hand - a higher number of comparisons.
 
-Let me do some math in order to find a reasonable answer whether (and when) it worth to use a dual-pivot binary search algorithm or not. A couple of new variables should be introduces: `p` - latency of a recursive (or simple) call,  `q` - latency of a compare operation (i.e., an integer compare). Thus, we can define the _total_ running time of a binary search algorithm as follows.
+Let me do some math in order to find a reasonable answer whether (and when) it's worth to use a dual-pivot binary search algorithm or not. A couple of new variables should be introduces: `p` - latency of a recursive (or simple) call,  `q` - latency of a compare operation (i.e., an integer compare). Now we can define the _total_ running time of a binary search algorithm as follows.
 
 {% highlight bash %}
 t(binary search) = p * log_2 n + 2q * log_2 n 
@@ -128,7 +128,7 @@ d.DPBS.benchmarkBS       avgt         5       81.665        8.000    ns/op
 d.DPBS.benchmarkDPBS     avgt         5       69.563        8.410    ns/op
 {% endhighlight %}
 
-This performance results (70 nanoseconds vs. 80 nanoseconds on a hugest array that I managed to allocate on my MacBook Pro) sums up in a very robust conclusion: a classic binary search algorithm's fast as hell. Seriously, it's one of the fastest algorithms around. So, if you have a bunch of ordered numbers and you want to perform a search on them - relax and use `Arrays.binarySearch()` or even [write your own implementation][11] for a [particular case][10].
+These performance results (70 nanoseconds vs. 80 nanoseconds on a hugest array that I managed to allocate on my MacBook Pro) sums up in a very robust conclusion: a classic binary search algorithm's fast as hell. Seriously, it's one of the fastest algorithms around. So, if you have a bunch of ordered numbers and you want to perform a search on them - relax and use `Arrays.binarySearch()` or even [write your own implementation][11] for a [particular case][10].
 
 [1]: http://iaroslavski.narod.ru/quicksort/DualPivotQuicksort.pdf
 [2]: http://www.cs.cornell.edu/courses/cs3110/2012sp/lectures/lec20-master/lec20.html
