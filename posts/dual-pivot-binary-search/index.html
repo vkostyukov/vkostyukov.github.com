@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>   
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <title>Vladimir Kostyukov - Research & Engineering</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css" />
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+    <!-- This is for syntax highlight -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/syntax.css">
+    <!-- Customisation  -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/main.css" />
+
+</head>
+<body class="home-template">
+
+    
+    <header class="site-head">
+    <div class="vertical">
+        <div class="site-head-content" class="inner">
+            
+                <a class="blog-logo" href="http://vkostyukov.ru">
+                    <img src="http://vkostyukov.ru/assets/images/header.png" alt="Vladimir Kostyukov" />
+                </a>
+            
+        </div>
+    </div>
+</header>
+
+<main class="content" role="main">
+    <article class="post">
+<!--
+        <header class="post-header">
+            <a id="blog-logo" href="/">
+                
+                    <img src="http://vkostyukov.ru/assets/images/header.png" alt="Vladimir Kostyukov" />
+                 
+            </a>
+        </header>
+-->  
+        <span class="post-meta">
+            <time datetime="2014-02-06">06 Feb 2014</time>
+            
+                on
+                
+                    java,
+                
+                    algorithms
+                
+            
+       	</span>
+
+        <h2 class="post-title">Dual-Pivot Binary Search</h2>
+
+        <section class="post-content">
+            <p>In 2009, Vladimir Yaroslavski introduced a <a href="http://iaroslavski.narod.ru/quicksort/DualPivotQuicksort.pdf">Dual-Pivot QuickSort</a> algorithm, which is currently the default sorting algorithm for primitive types in Java 8. The idea behind this algorithm is both simple and awesome. Instead of using single pivot element, it uses two pivots that divide an input array into three intervals (against two intervals in original <a href="http://en.wikipedia.org/wiki/Quicksort">QuickSort</a>). This allowed to decrease the height of <a href="http://www.cs.cornell.edu/courses/cs3110/2012sp/lectures/lec20-master/lec20.html">recursion tree</a> as well as reduce the number of comparisons. The post describes a similar dual-pivot approach but for a <a href="http://en.wikipedia.org/wiki/Binary_search_algorithm">BinarySearch</a> algorithm. Thus, our modified binary search algorithm has prefix <em>Dual-Pivot</em>.</p>
+
+<p>First of all, consider a standard variation of a <em>binary search</em> algorithm. </p>
+
+<div class="highlight"><pre><code class="java"><span class="kt">int</span> <span class="nf">binarysearch</span><span class="o">(</span><span class="kt">int</span> <span class="n">a</span><span class="o">[],</span> <span class="kt">int</span> <span class="n">k</span><span class="o">,</span> <span class="kt">int</span> <span class="n">lo</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hi</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">lo</span> <span class="o">==</span> <span class="n">hi</span><span class="o">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+
+  <span class="kt">int</span> <span class="n">p</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">+</span> <span class="o">(</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="o">)</span> <span class="o">/</span> <span class="mi">2</span><span class="o">;</span>
+
+  <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">a</span><span class="o">[</span><span class="n">p</span><span class="o">])</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">binarysearch</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">k</span><span class="o">,</span> <span class="n">lo</span><span class="o">,</span> <span class="n">p</span><span class="o">);</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">&gt;</span> <span class="n">a</span><span class="o">[</span><span class="n">p</span><span class="o">])</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">binarysearch</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">k</span><span class="o">,</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">hi</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="k">return</span> <span class="n">p</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>We&#39;ll use a <a href="http://en.wikipedia.org/wiki/Master_theorem">Master Method</a> in order to understand its time complexity in terms of <a href="http://en.wikipedia.org/wiki/Big_O_notation">Big-Oh</a> notation. The idea behind a master method is to express algorithm&#39;s running time in terms of the following recurrent relation.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">T</span><span class="o">(</span><span class="n">n</span><span class="o">)</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="n">T</span><span class="o">(</span><span class="n">n</span><span class="o">/</span><span class="n">b</span><span class="o">)</span> <span class="o">+</span> <span class="n">O</span><span class="o">(</span><span class="n">n</span><span class="o">^</span><span class="n">c</span><span class="o">)</span>
+</code></pre></div>
+
+<p>The exact meaning of this relation is following: the running time <code>T(n)</code> of the algorithm on input <code>n</code> is equal to sum of the running times of each recursive call <code>T(n/b)</code> plus some extra job <code>O(n^c)</code> at each level of recursion. Note that a master method only works for <a href="http://en.wikipedia.org/wiki/Divide_and_conquer_algorithm">Divide and Conquer</a> algorithms.</p>
+
+<p>The binary search algorithm does </p>
+
+<ul>
+<li>split the input onto two equals intervals: <code>b = 2</code></li>
+<li>perform only one recursive call, depending on whether the key is less or greater then the pivot element: <code>a = 1</code></li>
+<li>compare the key with the pivot element at each level of recursion, which takes a constant time: <code>c = 0</code></li>
+</ul>
+
+<p>Thus, the following recurrent relation describes a standard binary search algorithm, where <code>a = 1</code> (number of recursive calls), <code>b = 2</code> (how many pieces we split the data at each level of recursion) and <code>c = 0</code> (we also do some constant work at each recursion call).</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">T</span><span class="o">(</span><span class="n">n</span><span class="o">)</span> <span class="o">=</span> <span class="n">T</span><span class="o">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="o">)</span> <span class="o">+</span> <span class="n">O</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+</code></pre></div>
+
+<p>The relation <code>a == b ^ c</code> or <code>1 == 2 ^ 0</code> gives us the first case in a master method, which results in the running time <code>O(n^c * log_b n)</code> or <code>O(log_2 n)</code> in particular.</p>
+
+<p>It&#39;s time to use a dual-pivot element instead of a single-pivot one. This gives us three intervals and a couple of additional comparisons.</p>
+
+<div class="highlight"><pre><code class="java"><span class="kt">int</span> <span class="nf">dualPivotBinarysearch</span><span class="o">(</span><span class="kt">int</span> <span class="n">a</span><span class="o">[],</span> <span class="kt">int</span> <span class="n">k</span><span class="o">,</span> <span class="kt">int</span> <span class="n">lo</span><span class="o">,</span> <span class="kt">int</span> <span class="n">hi</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">lo</span> <span class="o">==</span> <span class="n">hi</span><span class="o">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+
+  <span class="kt">int</span> <span class="n">p</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">+</span> <span class="o">(</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="o">)</span> <span class="o">/</span> <span class="mi">3</span><span class="o">;</span>
+  <span class="kt">int</span> <span class="n">q</span> <span class="o">=</span> <span class="n">lo</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="o">(</span><span class="n">hi</span> <span class="o">-</span> <span class="n">lo</span><span class="o">)</span> <span class="o">/</span> <span class="mi">3</span><span class="o">;</span>
+
+  <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">&lt;</span> <span class="n">a</span><span class="o">[</span><span class="n">p</span><span class="o">])</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">dualPivotBinarysearch</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">k</span><span class="o">,</span> <span class="n">lo</span><span class="o">,</span> <span class="n">p</span><span class="o">);</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">&gt;</span> <span class="n">a</span><span class="o">[</span><span class="n">p</span><span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="n">a</span><span class="o">[</span><span class="n">q</span><span class="o">])</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">dualPivotBinarysearch</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">k</span><span class="o">,</span> <span class="n">p</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">q</span><span class="o">);</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">&gt;</span> <span class="n">a</span><span class="o">[</span><span class="n">q</span><span class="o">])</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nf">dualPivotBinarysearch</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">k</span><span class="o">,</span> <span class="n">q</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">hi</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="k">return</span> <span class="o">(</span><span class="n">k</span> <span class="o">==</span> <span class="n">a</span><span class="o">[</span><span class="n">p</span><span class="o">])</span> <span class="o">?</span> <span class="n">p</span> <span class="o">:</span> <span class="n">q</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>It should be clear now that a recurrent relation for a <em>dual-pivot</em> binary search looks as follows.</p>
+
+<div class="highlight"><pre><code class="java"><span class="n">T</span><span class="o">(</span><span class="n">n</span><span class="o">)</span> <span class="o">=</span> <span class="n">T</span><span class="o">(</span><span class="n">n</span><span class="o">/</span><span class="mi">3</span><span class="o">)</span> <span class="o">+</span> <span class="n">O</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+</code></pre></div>
+
+<p>The only difference is a data <em>split factor</em>, which is <code>3</code> against <code>2</code> in the original relation. Thus, three intervals give us a new time complexity: <code>O(log_3 n)</code>. The careful reader may notice, that a logarithm&#39;s base is a constant factor, which is redundant and might be eliminated according to the Big-Oh definition rules. So, both algorithm have the same time bounds - <code>O(log n)</code>. And it&#39;s doesn&#39;t really matter what base of <code>log</code> is.</p>
+
+<p>That is a partially true. We usually don&#39;t care about constant factors in asymptotic bounds, since it doesn&#39;t affect the algorithm&#39;s scalability. The only thing we care is whether the algorithm is able to process the bigger (much bigger) input in a reasonable time or not. But, when it comes to a deeper analysis of the particular algorithm implementation, it may be useful keeping in mind the constant factors as well.</p>
+
+<p>The new time complexity gives us a shorter version of a recursive tree: <code>log_3 n</code> against <code>log_2 n</code>. In other words, it gives us a shorter stack trace as well as a smaller memory footprint (due to reduced number of the allocated stack frames). For example, for n = 2 147 483 647 (a maximum length of the array that might be allocated in JVM) we&#39;ll have a 40% shorter recursive tree. Isn&#39;t it awesome? Not really. To be honest, 40% is from difference between 31 and 19 (base <code>2</code> against base <code>3</code> in a logarithmic function). A logarithm is an awesome function! It takes a number and makes it smaller. I wish all the algorithms have had a logarithm in their asymptotic bounds.</p>
+
+<p>Well, what does it cost to make 31 recursive calls on a modern JVM (and a modern CPU as well)? I bet - <em>nothing</em>. And this might be a strong reason why we didn&#39;t study a dual-pivot binary search algorithm in a university course. Another reason is optimizing compilers (i.e., a <a href="http://en.wikipedia.org/wiki/HotSpot">HotSpot JIT Compiler</a>) that can easily eliminate a <a href="http://en.wikipedia.org/wiki/Tail_call">tail-recursion</a> by replacing it with a simple iterative loop. Thus, all the fictional benefits of using a dual-pivot binary search might be completely lost.</p>
+
+<p>Anyway, there is still an interesting part of a dual-pivot approach that wasn&#39;t discussed yet - a <em>number of comparisons</em>. Using a dual-pivot element introduces a different number of comparisons per recursive call: <code>4</code> (against <code>2</code> in a classic scheme), which doesn&#39;t sound optimistic, but still should be investigated. And the easiest way to check whether it&#39;s worth to use a dual-pivot scheme or not is to look at graphical representation of both functions: <code>2 log_2 n</code> and <code>4 log_3 n</code>.</p>
+
+<p><img src="http://vkostyukov.ru/assets/images/chart.png" alt="A chart"></p>
+
+<p>The chart above shows that a dual-pivot scheme uses a bit more comparisons then a single-pivot one on the same input. More precisely, it uses 20% more comparisons then an original algorithm. Thus, a dual-pivot approach introduces both shorter recursive tree (less number of recursive call) but higher number of comparisons. </p>
+
+<p>Let me do some math in order to find a reasonable answer whether (and when) it worth to use a dual-pivot binary search algorithm or not. A couple of new variables should be introduces: <code>p</code> - latency of a recursive (or simple) call,  <code>q</code> - latency of a compare operation (i.e., an integer compare). Thus, we can define the <em>total</em> running time of a binary search algorithm as follows.</p>
+
+<div class="highlight"><pre><code class="bash">t<span class="o">(</span>binary search<span class="o">)</span> <span class="o">=</span> p * log_2 n + 2q * log_2 n 
+</code></pre></div>
+
+<p>It just straightforward: we waste <code>p * log_2 n</code> time doing recursive calls plus <code>2q * log_2 n</code> doing comparisons. The similar formula might be defined for a dual-pivot binary search algorithm.</p>
+
+<div class="highlight"><pre><code class="bash">t<span class="o">(</span>dual-pivot binary search<span class="o">)</span> <span class="o">=</span> p * log_3 n + 4q * log_3 n 
+</code></pre></div>
+
+<p>And we want to find a relation between <code>q</code> and <code>p</code> for which the following will be true (we&#39;re looking for constraints with which a dual-pivot scheme takes less time).</p>
+
+<div class="highlight"><pre><code class="bash">t<span class="o">(</span>binary search<span class="o">)</span> &gt; t<span class="o">(</span>dual-pivot binary search<span class="o">)</span>
+
+.. or ..
+
+<span class="o">(</span>p * log_2 n<span class="o">)</span> + <span class="o">(</span>2q * log_2 n<span class="o">)</span> &gt; <span class="o">(</span>p * log_3 n<span class="o">)</span> + <span class="o">(</span>4q * log_3 n<span class="o">)</span>
+</code></pre></div>
+
+<p>This gives us a strict answer: <code>p &gt; 1.5 q</code>. In other words, it does make sense to use a dual-pivot approach on a platform for which making a function call costs at least as 1.5x of compare operation.</p>
+
+<p>That&#39;s nice to know, but can we find a more concrete answer? Well, it&#39;s not that easy. It really depends on a hardware platform (ISA, micro-architecture) as well as on a software platform (compiler, runtime). Consider we use a compiler without tail-call optimization on a modern Intel&#39;s CPU (like Haswell). An Agner&#39;s <a href="http://www.agner.org/optimize/instruction_tables.pdf">optimization manual</a> says that it takes 1 or 2 clock-ticks for both <code>CMP</code> and <code>FUCOMI</code>/<code>FUCOMIP</code> instructions. Needless to say that <code>JMP</code>, <code>SUB</code> and <code>MOV</code> cost almost nothing: ~3-4 clock-ticks in total. Why do we need these three instructions? Well, a usual <em>calling convention</em> does</p>
+
+<ul>
+<li>perform a jump to a function - <code>JMP</code></li>
+<li>save the current stack pointer - <code>MOV</code></li>
+<li>reserve a stack for locals - <code>SUB</code></li>
+</ul>
+
+<p>Well, it&#39;s roughly takes 3-4 clock-ticks in order to make a function call on a modern x86 chip. And this almost what we was looking for. We can say that it might be a good idea of using a dual-pivot binary search instead of a classic one. But the benefits we get in this case are such imperceptible that we won&#39;t even see the difference. The only micro-benchmarking will help us find a truth.</p>
+
+<p>The full source code of a <a href="http://openjdk.java.net/projects/code-tools/jmh/">JMH</a>-based benchmark is available <a href="https://gist.github.com/vkostyukov/6201007">at GitHub</a>. The results look as follows.</p>
+
+<div class="highlight"><pre><code class="bash">Benchmark                Mode   Samples         Mean   Mean error    Units
+d.DPBS.benchmarkBS       avgt         5       81.665        8.000    ns/op
+d.DPBS.benchmarkDPBS     avgt         5       69.563        8.410    ns/op
+</code></pre></div>
+
+<p>This performance results (70 nanoseconds vs. 80 nanoseconds on a hugest array that I managed to allocate on my MacBook Pro) sums up in a very robust conclusion: a classic binary search algorithm&#39;s fast as hell. Seriously, it&#39;s one of the fastest algorithms around. So, if you have a bunch of ordered numbers and you want to perform a search on them - relax and use <code>Arrays.binarySearch()</code> or even <a href="http://reprog.wordpress.com/2010/04/19/are-you-one-of-the-10-percent/">write your own implementation</a> for a <a href="https://github.com/vkostyukov/la4j/blob/master/src/main/java/org/la4j/matrix/sparse/CRSMatrix.java#L407">particular case</a>.</p>
+
+        </section>
+
+        
+
+        <footer class="post-footer">
+            <!-- If we want to display author's name and bio -->
+            
+                <section class="author">
+                    <header> <a href="/"> <img class="profile" src="/assets/images/profile.jpg" alt="Author's profile picture"></a></header>
+                    <article>
+                        <!-- Author Name -->
+                        <h4> Vladimir Kostyukov </h4>
+                        <!-- Author Bio -->
+                        <p> 
+                            Independent Researcher. Dependent Engineer.
+                            <br />
+                            Twitter: <a href="http://twitter.com/vkostyukov">@vkostyukov</a>, Blog: <a href="http://vkostyukov.ru">http://vkostyukov.ru</a>
+                        </p>
+                    </article>
+                </section>                
+            
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="http://twitter.com/share?text=Dual-Pivot Binary Search&amp;url=http://vkostyukov.ru/posts/dual-pivot-binary-search"
+                    onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://vkostyukov.ru/posts/dual-pivot-binary-search"
+                    onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://vkostyukov.ru/posts/dual-pivot-binary-search"
+                   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+            
+            
+            <section class="disqus">
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+
+                    var disqus_shortname = 'vkostyukov'; 
+                    var disqus_developer = 0; // developer mode is on
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+            </section>
+            
+        </footer>
+    </article>
+</main>
+
+
+    <footer class="site-footer">
+        <a class="subscribe icon-feed" href="/rss.xml"><span class="tooltip">Subscribe!</span></a>
+        <div class="inner">
+             <section class="copyright">All content copyright <a href="/">Vladimir Kostyukov</a> &copy;  &bull; All rights reserved.</section>
+             <section class="poweredby">Made with Jekyll using <a href="http://github.com/rosario/kasper">Kasper theme</a></section>
+        </div>
+    </footer>
+
+    
+    <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+    <script type="text/javascript" src="/assets/js/index.js"></script>
+
+    <!-- Google Analytics Tracking code -->
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-XXXXXXXX-X']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>   
+</body>
+</html>

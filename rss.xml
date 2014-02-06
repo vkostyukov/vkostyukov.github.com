@@ -7,8 +7,16 @@
   <channel>
     <title>Vladimir Kostyukov</title>
     <link>http://vkostyukov.ru</link>
-    <description>Technical Blog</description>
-    <pubDate>Sat, 01 Feb 2014 10:00:00 -0000</pubDate>
+    <description>Research &amp; Engineering</description>
+    <pubDate>Thu, 06 Feb 2014 10:00:00 -0000</pubDate>
+    <item>
+      <title>Dual-Pivot Binary Search</title>
+      <link>http://vkostyukov.ru/posts/dual-pivot-binary-search</link>
+      <description>&lt;p&gt;In 2009, Vladimir Yaroslavski introduced a &lt;a href=&quot;http://iaroslavski.narod.ru/quicksort/DualPivotQuicksort.pdf&quot;&gt;Dual-Pivot QuickSort&lt;/a&gt; algorithm, which is currently the default sorting algorithm for primitive types in Java 8. The idea behind this algorithm is both simple and awesome. Instead of using single pivot element, it uses two pivots that divide an input array into three intervals (against two intervals in original &lt;a href=&quot;http://en.wikipedia.org/wiki/Quicksort&quot;&gt;QuickSort&lt;/a&gt;). This allowed to decrease the height of &lt;a href=&quot;http://www.cs.cornell.edu/courses/cs3110/2012sp/lectures/lec20-master/lec20.html&quot;&gt;recursion tree&lt;/a&gt; as well as reduce the number of comparisons. The post describes a similar dual-pivot approach but for a &lt;a href=&quot;http://en.wikipedia.org/wiki/Binary_search_algorithm&quot;&gt;BinarySearch&lt;/a&gt; algorithm. Thus, our modified binary search algorithm has prefix &lt;em&gt;Dual-Pivot&lt;/em&gt;.&lt;/p&gt;
+</description>
+      <pubDate>Thu, 06 Feb 2014 10:00:00 -0000</pubDate>
+      <dc:date>2014-02-06T10:00:00Z</dc:date>
+    </item>
     <item>
       <title>Finagle Your Fibonacci Calculation</title>
       <link>http://vkostyukov.ru/posts/finagle-your-fibonacci-calculation</link>
@@ -25,6 +33,6 @@
       <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
       <dc:date>2014-01-19T10:00:00Z</dc:date>
     </item>
-    <dc:date>2014-02-01T10:00:00Z</dc:date>
+    <dc:date>2014-02-06T10:00:00Z</dc:date>
   </channel>
 </rss>

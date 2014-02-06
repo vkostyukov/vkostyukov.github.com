@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
-    <title>Vladimir Kostyukov - Technical Blog</title>
+    <title>Vladimir Kostyukov - Research & Engineering</title>
     <meta name="description" content="" />
 
     <meta name="HandheldFriendly" content="True" />
@@ -33,7 +33,7 @@
             
  <!--           <h1 class="blog-title">Vladimir Kostyukov</h1>
             <h2 class="blog-description"> 
-                Technical Blog. 
+                Research & Engineering. 
                  <a href='/about/'> About me </a> 
             </h2>
  -->
@@ -44,6 +44,20 @@
 <center/><a href='/about/'>[about the author]</a></center>
 
 <main class="content" role="main">
+
+    
+
+    <article class="post">
+        <header class="post-header">
+            <span class="post-meta"><time datetime="06 Feb 2014">06 Feb 2014</time> </span>
+            <h2 class="post-title"><a href="/posts/dual-pivot-binary-search">Dual-Pivot Binary Search</a></h2>
+
+        </header>
+        <section class="post-excerpt">
+            <p>In 2009, Vladimir Yaroslavski introduced a <a href="http://iaroslavski.narod.ru/quicksort/DualPivotQuicksort.pdf">Dual-Pivot QuickSort</a> algorithm, which is currently the default sorting algorithm for primitive types in Java 8. The idea behind this algorithm is both simple and awesome. Instead of using single pivot element, it uses two pivots that divide an input array into three intervals (against two intervals in original <a href="http://en.wikipedia.org/wiki/Quicksort">QuickSort</a>). This allowed to decrease the height of <a href="http://www.cs.cornell.edu/courses/cs3110/2012sp/lectures/lec20-master/lec20.html">recursion tree</a> as well as reduce the number of comparisons. The post describes a similar dual-pivot approach but for a <a href="http://en.wikipedia.org/wiki/Binary_search_algorithm">BinarySearch</a> algorithm. Thus, our modified binary search algorithm has prefix <em>Dual-Pivot</em>.</p>
+
+        </section>
+    </article>
 
     
 
