@@ -128,7 +128,9 @@ d.DPBS.benchmarkBS       avgt         5       81.665        8.000    ns/op
 d.DPBS.benchmarkDPBS     avgt         5       69.563        8.410    ns/op
 {% endhighlight %}
 
-These performance results (70 nanoseconds vs. 80 nanoseconds on a hugest array that I managed to allocate on my MacBook Pro) sums up in a very robust conclusion: a classic binary search algorithm's fast as hell. Seriously, it's one of the fastest algorithms around. So, if you have a bunch of ordered numbers and you want to perform a search on them - relax and use `Arrays.binarySearch()` or even [write your own implementation][11] for a [particular case][10].
+These performance results (70 nanoseconds vs. 80 nanoseconds on a hugest array that I managed to allocate on my MacBook Pro) sums up in a very robust conclusion: a classic binary search algorithm's fast as hell. Seriously, it's one of the fastest algorithms around. Just think about we wasted 80 nanoseconds (read it again - _nanoseconds_) in order to search in 2Gb array. That's crazy fast and the difference in 10ns (read it again - _nanoseconds_) is just sort of quantum side-effects. So, if you have a bunch of ordered numbers and you want to perform a search on them - relax and use `Arrays.binarySearch()` or even [write your own implementation][11] for a [particular case][10].
+
+The point is we don't need a dual-pivot approach, since it gives you almost nothing on a modern platforms. The aim of this post is to find a reasonable answer on a question why there's still no dual-pivot binary search around. I didn't want to get a _faster_ version of a original binary search, which surely can be done by rewriting a tail-recursion with iteration (but it's not even necessary - just think of 31 recursive calls in a wost case). I just wanted to show how use complexity analysis along with math and knowledge about your platform in order to dig into the interesting question and have fun.
 
 [1]: http://iaroslavski.narod.ru/quicksort/DualPivotQuicksort.pdf
 [2]: http://www.cs.cornell.edu/courses/cs3110/2012sp/lectures/lec20-master/lec20.html
