@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>   
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <title>Vladimir Kostyukov - Research & Engineering</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css" />
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+    <!-- This is for syntax highlight -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/syntax.css">
+    <!-- Customisation  -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/main.css" />
+
+</head>
+<body class="home-template">
+
+    
+    <header class="site-head">
+    <div class="vertical">
+        <div class="site-head-content" class="inner">
+            
+                <a class="blog-logo" href="http://vkostyukov.ru">
+                    <img src="http://vkostyukov.ru/assets/images/header.png" alt="Vladimir Kostyukov" />
+                </a>
+            
+        </div>
+    </div>
+</header>
+
+<main class="content" role="main">
+    <article class="post">
+<!--
+        <header class="post-header">
+            <a id="blog-logo" href="/">
+                
+                    <img src="http://vkostyukov.ru/assets/images/header.png" alt="Vladimir Kostyukov" />
+                 
+            </a>
+        </header>
+-->  
+        <span class="post-meta">
+            <time datetime="2014-04-01">01 Apr 2014</time>
+            
+                on
+                
+                    scala,
+                
+                    algorithms
+                
+            
+       	</span>
+
+        <h2 class="post-title">Combinatorial Algorithms in Scala</h2>
+
+        <section class="post-content">
+            <p><a href="http://en.wikipedia.org/wiki/Combinatorics">Combinatorics</a> is a branch of mathematics that mostly focuses on problems of counting the structures of given size and kind. The most famous and well-known examples of such problems might be often asked as job interview questions. This blog post presents four generational problems (<a href="http://en.wikipedia.org/wiki/Combination">combinations</a>, <a href="http://en.wikipedia.org/wiki/Subset">subsets</a>, <a href="http://en.wikipedia.org/wiki/Permutations">permutations</a> and <a href="http://en.wikipedia.org/wiki/Combination">variations</a>) along with their <em>purely functional</em> implementations in Scala.</p>
+
+<h4>Implicit Classes</h4>
+
+<p>Scala&#39;s <a href="http://docs.scala-lang.org/sips/completed/implicit-classes.html"><em>implicit classes</em></a> provide simple and composable way of extending the API of third-party classes. For example, the following implicit class extends default <code>Int</code> class within a new method <code>times(fn: Unit =&gt; Unit): Unit</code> that executes given function <code>fn</code> n-times.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">object</span> <span class="nc">IntOps</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">class</span> <span class="nc">ExtendedInt</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="n">times</span><span class="o">(</span><span class="n">fn</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=&gt;</span> <span class="nc">Unit</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span>
+      <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">).</span><span class="n">foreach</span><span class="o">(</span><span class="n">fn</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>  
+</code></pre></div>
+
+<p>This gives us a very neat usage way. All one need to do is import an implicit class into the current namespace and let the magic happened.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">IntOps._</span>
+<span class="mf">5.</span><span class="n">times</span> <span class="o">{</span>
+  <span class="n">println</span><span class="o">(</span><span class="s">&quot;Hello, World!&quot;</span><span class="o">)</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>We&#39;ll use this approach in order to extend Scala&#39;s <code>List</code> with four new methods that implement our combinatorial algorithms. The only one restriction we have to satisfy here: new functions&#39; names shouldn&#39;t conflict with an existent API. Thus, we&#39;ll use a prefix <code>x</code> (from <em>eXtended</em>) for new functions. The following listing represents a skeleton class we&#39;re going to implement.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">object</span> <span class="nc">CombinatorialOps</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">class</span> <span class="nc">CombinatorialList</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">l</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span> <span class="o">{</span>
+
+    <span class="k">def</span> <span class="n">xcombinations</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+    <span class="k">def</span> <span class="n">xsubsets</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+    <span class="k">def</span> <span class="n">xvariations</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+    <span class="k">def</span> <span class="n">xpermutations</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span> <span class="o">???</span>
+
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>This tiny class might be used as follows (in the exact way as <code>IntOps</code> was used below).</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">import</span> <span class="nn">CombinatorialOps._</span>
+<span class="k">val</span> <span class="n">c</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">).</span><span class="n">xcombinations</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+</code></pre></div>
+
+<h4>Optimistic Programming</h4>
+
+<p><em>Optimistic Programming</em> is an implementation technique of recursive programs when it&#39;s believed that a recursive function works as expected on a smaller input (on a sub-problem) in order to use its result for solving the full-size problem. In other words, the body of recursive function may be implemented in terms of following ideas: (a) when called recursively it gives the right answer for any sub-problem, but (b) some additional work should be done in order to merge these sub-problem solutions into the single solution of the entire problem. Doesn&#39;t that sound <em>optimistic</em>? The recursive function is pretended to be correctly implemented <em>before</em> its body is actually being written.</p>
+
+<p>An optimistic programming lie between <a href="http://en.wikipedia.org/wiki/Divide_and_conquer_algorithms">Divide and Conquer</a> and <a href="http://en.wikipedia.org/wiki/Dynamic_programming">Dynamic Programming</a> techniques. Rather then focussing on how sub-problems are being splited (whether or not the sub-problems overlap) an optimistic programming focuses on the nature of recursive programs and provides a simple tool making the programming of complex problems much easier.</p>
+
+<p>We&#39;ll use an optimistic programming for solving combinatorial problems in a functional setting.</p>
+
+<h4>Combinations</h4>
+
+<p>Imagine you&#39;re given a standard deck of fifty-two cards and asked to select any two of them. Those pair of cards you&#39;ll select is called a <em>combination</em> (i.e., a <em>2-combination</em>). And there are 1326 such 2-card combinations that may be possibly selected from a standard card deck. More formally, a <a href="http://en.wikipedia.org/wiki/Binomial_coefficient">binomial coefficient</a> defines the number of <em>k-combinations</em> from a set of <code>n</code> distinct elements.</p>
+
+<p>The combination elements&#39; order <em>doesn&#39;t</em> matter. So, <code>[a, b]</code> and <code>[b, a]</code> are the same combinations.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="n">scala</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="s">&quot;c&quot;</span><span class="o">).</span><span class="n">xcombinations</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="n">res1</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">c</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">))</span>
+</code></pre></div>
+
+<p>It&#39;s time to use the power of optimistic programming for solving the problem of generating <em>k-combinations</em>. An optimistic programming guarantees that a recursive function being called on a <em>sub-problem</em> produces a correct answer. A sub-problem of generating k-combinations is generating (k-1)-combinations. The only one question&#39;s left: how to solve an entire problem then? This is when the things become interesting. Obviously, there is should be <em>an extra element</em> in the set, which being added to a (k-1)-combination upgrades it to a <em>full-size</em> k-combination. A set&#39;s <em>extra</em> element is nothing different from a <em>regular</em> set&#39;s element. And set <code>S</code> itself is a <em>recursive object</em>, which without one element is still a set <code>S&#39;</code> and may be processed recursively. Thus, the final solution contains both <code>S&#39;</code>&#39;s k-combinations and <code>S&#39;</code>&#39;s (k-1)-combinations with an extra element appended.</p>
+
+<p>There are also two corner cases that we have to handle separately. There is nothing to do when <code>k &gt; n</code> (combination&#39;s size is greater then an entire set&#39;s size). And there is no further grouping required if it&#39;s a generation of 1-combinations.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="cm">/**</span>
+<span class="cm"> * Generates the combinations of this list with given length &#39;n&#39;. The order</span>
+<span class="cm"> * doesn&#39;t matter.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The total number of k-combinations on n-length set might be calculated</span>
+<span class="cm"> * as follows:</span>
+<span class="cm"> *</span>
+<span class="cm"> *                  C_k,n = n!/k!(n - k)!</span>
+<span class="cm"> *</span>
+<span class="cm"> * Time - O(C_k,n)</span>
+<span class="cm"> * Space - O(C_k,n)</span>
+<span class="cm"> */</span>
+<span class="k">def</span> <span class="n">xcombinations</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="n">xsize</span><span class="o">)</span> <span class="nc">Nil</span>
+  <span class="k">else</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="o">::</span> <span class="k">_</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">=&gt;</span>
+      <span class="n">l</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="k">_</span><span class="o">))</span>
+    <span class="k">case</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">tl</span> <span class="k">=&gt;</span>
+      <span class="n">tl</span><span class="o">.</span><span class="n">xcombinations</span><span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">).</span><span class="n">map</span><span class="o">(</span><span class="n">hd</span> <span class="o">::</span> <span class="k">_</span><span class="o">)</span> <span class="o">:::</span> <span class="n">tl</span><span class="o">.</span><span class="n">xcombinations</span><span class="o">(</span><span class="n">n</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">Nil</span>
+  <span class="o">}</span>
+</code></pre></div>
+
+<h4>Subsets</h4>
+
+<p>A set&#39;s k-combination may also be referenced as a <em>subset</em>. The other combinatorial problem is generating all the subsets (all k-combinations, where <code>k = 1..n</code>) of a given set.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="n">scala</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="s">&quot;c&quot;</span><span class="o">).</span><span class="n">xsubsets</span>
+<span class="n">res1</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">c</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">b</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">c</span><span class="o">))</span>
+</code></pre></div>
+
+<p>The implementation is straightforward - combinations of all the possible sizes should be merged together. That may be done by List&#39;s <code>foldLeft</code> operation.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="cm">/**</span>
+<span class="cm"> * Generates all the subsets of this list. The order doesn&#39;t matter.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The total number of subsets might be obtained from variations formula:</span>
+<span class="cm"> *</span>
+<span class="cm"> *                  S_n = sum(i=1..n) {C_i,n} = 2 ** n</span>
+<span class="cm"> *</span>
+<span class="cm"> * Time - O(S_n)</span>
+<span class="cm"> * Space - O(S_n)</span>
+<span class="cm"> */</span>
+<span class="k">def</span> <span class="n">xsubsets</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span>
+  <span class="o">(</span><span class="mi">2</span> <span class="n">to</span> <span class="n">xsize</span><span class="o">).</span><span class="n">foldLeft</span><span class="o">(</span><span class="n">l</span><span class="o">.</span><span class="n">xcombinations</span><span class="o">(</span><span class="mi">1</span><span class="o">))((</span><span class="n">a</span><span class="o">,</span> <span class="n">i</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">xcombinations</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">:::</span> <span class="n">a</span><span class="o">)</span>
+</code></pre></div>
+
+<p>There are <code>2^n</code> subset of an n-size set. It&#39;s choice of two: every set&#39;s element is either taken or not into the particular subset.</p>
+
+<h4>Variations</h4>
+
+<p>Unlike combinations, the order of elements inside a variation <em>does</em> matter. Thus, tuples <code>[a, b]</code> and <code>[b, a]</code> are different <em>variations</em> (i.e., <em>2-variations</em>). In general, variations are denoted as <em>partial permutations</em> or <em>k-permutations</em>, where <code>0 &lt; k &lt;= n</code>.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="n">scala</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="s">&quot;c&quot;</span><span class="o">).</span><span class="n">xvariations</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="n">res1</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">a</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">c</span><span class="o">,</span> <span class="n">a</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">c</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">c</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">))</span>
+</code></pre></div>
+
+<p>The number of <em>k-permutations</em> of <code>n</code> is the following product: <code>n * (n-1) * ... * (n-k+1)</code>. That&#39;s a bit different from a <em>binomial coefficient</em> (the number of <em>k-combinations</em> of <code>n</code>): there is no <code>k!</code> in a denominator, since it counts <em>all</em> the possible k-permutations rather then treating them equal.</p>
+
+<p>The same ideas of an <em>optimistic programming</em> may be used in generating the variations (k-permutations) of a given set. The corner cases are the same: there&#39;s nothing to do with <code>k &gt; n</code> or <code>k = 1</code>. Just like in combinations, these two cases should be handled separately. More interesting is the regular case: upgrading a recursively generated (k-1)-permutation to a <em>full-size</em> one. It&#39;s no longer a problem of getting <em>an extra element</em> from a set, as well as the <em>upgrading</em> itself is no longer a merging.</p>
+
+<p>Since the order does matter, an extra element should be <em>inserted</em> into the every possible place of a permutation rather then just being merged with it. So, instead of 1-by-1 mapping between unfinished and finished combination it comes to 1-by-k mapping for permutations: there are <code>k</code> places in (k-1)-permutation where an extra element may be inserted.</p>
+
+<p>Ultimately, by analogy with k-combinations, k-permutations of <code>S</code> contain all the k-permutations of <code>S&#39;</code>, where <code>S&#39;</code> is a without-out-element version of <code>S</code>.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="cm">/**</span>
+<span class="cm"> * Generates the variations of this list with given length &#39;n&#39;. The order</span>
+<span class="cm"> * does matter.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The total number of variations might be calculated as follows:</span>
+<span class="cm"> *</span>
+<span class="cm"> *                   V_k,n = n!/(n - k)!</span>
+<span class="cm"> *</span>
+<span class="cm"> * Time - O(V_k,n)</span>
+<span class="cm"> * Space - O(V_k,n)</span>
+<span class="cm"> */</span>
+<span class="k">def</span> <span class="n">xvariations</span><span class="o">(</span><span class="n">n</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">mixmany</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">A</span><span class="o">,</span> <span class="n">ll</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]])</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span> <span class="n">ll</span> <span class="k">match</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">tl</span> <span class="k">=&gt;</span> <span class="n">foldone</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">hd</span><span class="o">)</span> <span class="o">:::</span> <span class="n">mixmany</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">tl</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">Nil</span>
+  <span class="o">}</span>
+
+  <span class="k">def</span> <span class="n">foldone</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">A</span><span class="o">,</span> <span class="n">ll</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="n">ll</span><span class="o">.</span><span class="n">length</span><span class="o">).</span><span class="n">foldLeft</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="n">x</span> <span class="o">::</span> <span class="n">ll</span><span class="o">))((</span><span class="n">a</span><span class="o">,</span> <span class="n">i</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="o">(</span><span class="n">mixone</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="n">ll</span><span class="o">))</span> <span class="o">::</span> <span class="n">a</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="n">mixone</span><span class="o">(</span><span class="n">i</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">x</span><span class="k">:</span> <span class="kt">A</span><span class="o">,</span> <span class="n">ll</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">slice</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">i</span><span class="o">)</span> <span class="o">:::</span> <span class="o">(</span><span class="n">x</span> <span class="o">::</span> <span class="n">ll</span><span class="o">.</span><span class="n">slice</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">ll</span><span class="o">.</span><span class="n">length</span><span class="o">))</span>
+
+  <span class="k">if</span> <span class="o">(</span><span class="n">n</span> <span class="o">&gt;</span> <span class="n">xsize</span><span class="o">)</span> <span class="nc">Nil</span>
+  <span class="k">else</span> <span class="n">l</span> <span class="k">match</span> <span class="o">{</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="o">::</span> <span class="k">_</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">=&gt;</span> <span class="n">l</span><span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="k">_</span><span class="o">))</span>
+    <span class="k">case</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">tl</span> <span class="k">=&gt;</span> <span class="n">mixmany</span><span class="o">(</span><span class="n">hd</span><span class="o">,</span> <span class="n">tl</span><span class="o">.</span><span class="n">xvariations</span><span class="o">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">))</span> <span class="o">:::</span> <span class="n">tl</span><span class="o">.</span><span class="n">xvariations</span><span class="o">(</span><span class="n">n</span><span class="o">)</span>
+    <span class="k">case</span> <span class="k">_</span> <span class="k">=&gt;</span> <span class="nc">Nil</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<h4>Permutations</h4>
+
+<p><em>Permutations</em> are just set&#39;s size variations or k-permutations with <code>k = n</code>. A permutation may also be viewed as a result of a set&#39;s <em>shuffle</em> operation. In other words, every iteration of a shuffling the deck of cards process gives a new permutation. Permutations are counted by a product: <code>n * (n-1) * ... 1</code>, which is <code>n!</code>.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="n">scala</span><span class="o">&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="s">&quot;a&quot;</span><span class="o">,</span> <span class="s">&quot;b&quot;</span><span class="o">,</span> <span class="s">&quot;c&quot;</span><span class="o">).</span><span class="n">xpermutations</span>
+<span class="n">res1</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="n">c</span><span class="o">,</span> <span class="n">b</span><span class="o">,</span> <span class="n">a</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">c</span><span class="o">,</span> <span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">c</span><span class="o">,</span> <span class="n">b</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">,</span> <span class="n">a</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">b</span><span class="o">,</span> <span class="n">a</span><span class="o">,</span> <span class="n">c</span><span class="o">),</span>
+                                <span class="nc">List</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">,</span> <span class="n">c</span><span class="o">))</span>
+</code></pre></div>
+
+<p>The implementation of a purely-functional algorithm of generating the permutations is quite simple in terms of variations.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="cm">/**</span>
+<span class="cm"> * Generates all permutations of this list. The order does matter.</span>
+<span class="cm"> *</span>
+<span class="cm"> * The total number of permutations might be calculated as follows:</span>
+<span class="cm"> *</span>
+<span class="cm"> *                 P_n = V_n,n = n!</span>
+<span class="cm"> *</span>
+<span class="cm"> * Time - O(n!)</span>
+<span class="cm"> * Space - O(n!)</span>
+<span class="cm"> */</span>
+<span class="k">def</span> <span class="n">xpermutations</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]]</span> <span class="k">=</span> <span class="n">xvariations</span><span class="o">(</span><span class="n">xsize</span><span class="o">)</span>
+</code></pre></div>
+
+<h4>Further Improvements</h4>
+
+<p>The full version of <code>CombinatorialOps</code> class might be found <a href="https://gist.github.com/vkostyukov/9015987">at GitHub</a>. In order to reduce the memory footprint a bit of lazinesses may be involved by (a) replacing the output data type <code>List[List[A]]</code> with <code>Iterable[List[A]]</code> and (b) generating each piece of data <em>on-demand</em>.</p>
+
+        </section>
+
+        
+
+        <footer class="post-footer">
+            <!-- If we want to display author's name and bio -->
+            
+                <section class="author">
+                    <header> <a href="/"> <img class="profile" src="/assets/images/profile.jpg" alt="Author's profile picture"></a></header>
+                    <article>
+                        <!-- Author Name -->
+                        <h4> Vladimir Kostyukov </h4>
+                        <!-- Author Bio -->
+                        <p> 
+                            Independent Researcher. Dependent Engineer.
+                            <br />
+                            Twitter: <a href="http://twitter.com/vkostyukov">@vkostyukov</a>, Blog: <a href="http://vkostyukov.ru">http://vkostyukov.ru</a>
+                        </p>
+                    </article>
+                </section>                
+            
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="http://twitter.com/share?text=Combinatorial Algorithms in Scala&amp;url=http://vkostyukov.ru/posts/combinatorial-algorithms-in-scala"
+                    onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://vkostyukov.ru/posts/combinatorial-algorithms-in-scala"
+                    onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://vkostyukov.ru/posts/combinatorial-algorithms-in-scala"
+                   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+            
+            
+            <section class="disqus">
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+
+                    var disqus_shortname = 'vkostyukov'; 
+                    var disqus_developer = 0; // developer mode is on
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+            </section>
+            
+        </footer>
+    </article>
+</main>
+
+
+    <footer class="site-footer">
+        <a class="subscribe icon-feed" href="/rss.xml"><span class="tooltip">Subscribe!</span></a>
+        <div class="inner">
+             <section class="copyright"> &copy; <a href="/">Vladimir Kostyukov</a></section>
+        </div>
+    </footer>
+
+    
+    <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+    <script type="text/javascript" src="/assets/js/index.js"></script>
+
+    <!-- Google Analytics Tracking code -->
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-XXXXXXXX-X']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>   
+</body>
+</html>

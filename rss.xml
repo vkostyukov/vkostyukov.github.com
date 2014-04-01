@@ -8,7 +8,15 @@
     <title>Vladimir Kostyukov</title>
     <link>http://vkostyukov.ru</link>
     <description>Research &amp; Engineering</description>
-    <pubDate>Thu, 06 Feb 2014 10:00:00 -0000</pubDate>
+    <pubDate>Tue, 01 Apr 2014 10:00:00 -0000</pubDate>
+    <item>
+      <title>Combinatorial Algorithms in Scala</title>
+      <link>http://vkostyukov.ru/posts/combinatorial-algorithms-in-scala</link>
+      <description>&lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Combinatorics&quot;&gt;Combinatorics&lt;/a&gt; is a branch of mathematics that mostly focuses on problems of counting the structures of given size and kind. The most famous and well-known examples of such problems might be often asked as job interview questions. This blog post presents four generational problems (&lt;a href=&quot;http://en.wikipedia.org/wiki/Combination&quot;&gt;combinations&lt;/a&gt;, &lt;a href=&quot;http://en.wikipedia.org/wiki/Subset&quot;&gt;subsets&lt;/a&gt;, &lt;a href=&quot;http://en.wikipedia.org/wiki/Permutations&quot;&gt;permutations&lt;/a&gt; and &lt;a href=&quot;http://en.wikipedia.org/wiki/Combination&quot;&gt;variations&lt;/a&gt;) along with their &lt;em&gt;purely functional&lt;/em&gt; implementations in Scala.&lt;/p&gt;
+</description>
+      <pubDate>Tue, 01 Apr 2014 10:00:00 -0000</pubDate>
+      <dc:date>2014-04-01T10:00:00Z</dc:date>
+    </item>
     <item>
       <title>Dual-Pivot Binary Search</title>
       <link>http://vkostyukov.ru/posts/dual-pivot-binary-search</link>
@@ -33,6 +41,6 @@
       <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
       <dc:date>2014-01-19T10:00:00Z</dc:date>
     </item>
-    <dc:date>2014-02-06T10:00:00Z</dc:date>
+    <dc:date>2014-04-01T10:00:00Z</dc:date>
   </channel>
 </rss>
