@@ -13,17 +13,15 @@ about: about/
                     <img src="{{ site.url }}/{{ site.logo}}" alt="{{ site.name}}" />
                 </a>
             {% endif %}
- <!--           <h1 class="blog-title">{{ site.name}}</h1>
-            <h2 class="blog-description"> 
-                {{ site.description }}. 
-                {% if page.about %} <a href='{{site.baseurl}}{{ page.about }}'> About me </a> {% endif %}
-            </h2>
- -->
         </div>
     </div>
 </header>
 
-<center/><a href='{{site.baseurl}}{{ page.about }}'>[about the author]</a></center>
+<center/>
+  <a href='{{site.baseurl}}'>[home]</a> 
+  <a href='{{site.baseurl}}{{ page.about }}'>[about me]</a>
+  <a href="{{ site.baseurl }}rss.xml">[rss]</a>
+</center>
 
 <main class="content" role="main">
 
@@ -58,6 +56,4 @@ about: about/
         <a class="older-posts" href="/page{{ paginator.next_page }}/" title="Next Page">Older Posts &raquo;</a>
         {% endif %} 
     </nav>
-    
-
 </main>

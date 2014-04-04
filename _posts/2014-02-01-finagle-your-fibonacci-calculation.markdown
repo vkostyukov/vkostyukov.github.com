@@ -21,7 +21,7 @@ In other words, we simply maps every node from the recursive tree (the algorithm
 
 ### Finagle Power
 
-The Finagle's API provides three robust building blocks: [futures][2], [filers and services][11]. All the building blocks are designed to be composable in a very neat way. Thus, keeping in mind that futures are single-element _immutable containers_ while services and filters are _just functions_, it's really simple to reason about Finagle-powered code.
+The Finagle's API provides three robust building blocks: [futures][2], [filters and services][11]. All the building blocks are designed to be composable in a very neat way. Thus, keeping in mind that futures are single-element _immutable containers_ while services and filters are _just functions_, it's really simple to reason about Finagle-powered code.
 
 Finagle is a _service-oriented_ platform. So, all the interactions between servers and clients are built around services. Servers implements their behavior via services, while clients interacts with servers via services. Finally, service is just a function that takes type `A` and returns a future of type `B`.
 
@@ -91,7 +91,7 @@ class RemoteFibonacciCalculator(remote: Service[String, String])
 
 Good news here is that `BigInt` can be converted to the `String` (and vice versa) out-of-the box, so we can easily perform the conversion in one line.
 
-Now we're ready to setup our service that takes a Fibonacci calculator and delegates the clients' requests to it. Also, a bit of type conversions should be done here. The `FibonacciServie` can be treated as an _adapter_ of `FibonacciCalculator` to `Service` interface.
+Now we're ready to setup our service that takes a Fibonacci calculator and delegates the clients' requests to it. Also, a bit of type conversions should be done here. The `FibonacciService` can be treated as an _adapter_ of `FibonacciCalculator` to `Service` interface.
 
 {% highlight scala %}
 class FibonacciService(calculator: FibonacciCalculator) 
