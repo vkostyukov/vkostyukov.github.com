@@ -4,7 +4,6 @@ meta_description: ""
 
 markdown: redcarpet
 pygments: true
-logo: assets/images/header.png
 paginate: 15
 permalink: /posts/:title
 
