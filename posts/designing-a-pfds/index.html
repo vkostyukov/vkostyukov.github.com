@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>   
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <title>Vladimir Kostyukov - Research & Engineering</title>
+    <meta name="description" content="" />
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="/assets/css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css" />
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Noto+Serif:400,700,400italic|Open+Sans:700,400" />
+    <!-- This is for syntax highlight -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/syntax.css">
+    <!-- Customisation  -->
+    <link rel="stylesheet" type="text/css" href="/assets/css/main.css" />
+
+</head>
+<body class="home-template">
+
+    <header class="site-head">
+    <div class="vertical">
+        <div class="site-head-content" class="inner">
+            
+        </div>
+    </div>
+</header>
+
+<center/>
+  <a href='/'>[home]</a> 
+  <a href='/about/'>[about me]</a>
+  <a href="/rss.xml">[rss]</a>
+</center>
+
+<main class="content" role="main">
+    <article class="post">
+<!--
+        <header class="post-header">
+            <a id="blog-logo" href="/">
+                
+                    <span class="blog-title">Vladimir Kostyukov</span>
+                 
+            </a>
+        </header>
+-->  
+        <span class="post-meta">
+            <time datetime="2015-04-04">04 Apr 2015</time>
+            
+                on
+                
+                    scala,
+                
+                    fp
+                
+            
+       	</span>
+
+        <h2 class="post-title">Designing a Purely Functional Data Structure</h2>
+
+        <section class="post-content">
+            <p>Functional programming nicely leverages constraints on <em>how</em> programs are written thereby promoting a clean and easy to reason about coding style. <em>Purely functional data structures</em> are (surprisingly) built out of those constraints. They are <strong>persistent</strong> (FP implies that both <em>old</em> and <em>new</em> versions of an updated object is available) and backed by <strong>immutable</strong> objects (FP doesn&#39;t support <em>destructive updates</em>). Needless to say, it&#39;s a challenge to design a purely functional data structure that meets performance requirements of its imperative sibling. Fortunately, it&#39;s quite possible in most of the cases, even for those data structures whose reference implementations are backed by mutable arrays. This post precisely describes a process of designing a purely functional implementation technique for <a href="http://en.wikipedia.org/wiki/Binary_heap">Standard Binary Heaps</a>, with the same asymptotic bounds as in an imperative setting.</p>
+
+<h4>Immutability and Persistence</h4>
+
+<p><em>Immutability</em> and <em>persistent</em> are quite similar terms, which often substitute each other. We say <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Vector">immutable vector</a> (in Scala) but mean <a href="http://clojuredocs.org/clojure_core/clojure.core/vector">persistent vector</a> (in Clojure). These vector implementations are based on the same abstract data structure <a href="http://en.wikipedia.org/wiki/Hash_array_mapped_trie">Bit-Mapped Vector Trie</a> but named differently.</p>
+
+<ul>
+<li>Persistent objects support <strong>multiple versions</strong></li>
+<li>Immutable objects <strong>aren&#39;t changeable</strong></li>
+</ul>
+
+<p>The difference between immutable and persistent data structures in how they handle updates. A persistent data structure handles updates in a <em>smart</em> and memory-efficient way in order to keep its previous version unchanged, while an immutable data structure simply <em>doesn&#39;t care</em> about updates at all (for example, Guava&#39;s <a href="https://github.com/google/guava/blob/master/guava/src/com/google/common/collect/ImmutableList.java">ImmutableList</a>  doesn&#39;t even support updates), since its previous version could be destroyed.</p>
+
+<p>The following example demonstrates the difference between Guava&#39;s <code>ImmutableList</code> and Scala&#39;s persistent <code>List</code> in terms of memory footprint (smart updates vs. dumb updates).</p>
+
+<div class="highlight"><pre><code class="scala"><span class="c1">// xs takes O(n) memory </span>
+<span class="k">val</span> <span class="n">xs</span> <span class="k">=</span> <span class="nc">ImmutableList</span><span class="o">.</span><span class="n">of</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">3</span><span class="o">)</span> 
+
+<span class="c1">// yx takes O(n) memory</span>
+<span class="k">val</span> <span class="n">ys</span> <span class="k">=</span> <span class="mi">1</span> <span class="o">::</span> <span class="mi">2</span> <span class="o">::</span> <span class="mi">3</span> <span class="o">::</span> <span class="nc">Nil</span>
+
+<span class="c1">// dumb update: xxs takes O(n) memory (full copying)</span>
+<span class="k">val</span> <span class="n">xxs</span> <span class="k">=</span> <span class="nc">ImmutableList</span><span class="o">.</span><span class="n">builder</span><span class="o">.</span><span class="n">add</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="n">addAll</span><span class="o">(</span><span class="n">xs</span><span class="o">).</span><span class="n">build</span><span class="o">()</span>
+
+<span class="c1">// smart update: yys takes O(1) memory (structural sharing)</span>
+<span class="k">val</span> <span class="n">yyx</span> <span class="k">=</span> <span class="mi">0</span> <span class="o">::</span> <span class="n">yx</span>
+</code></pre></div>
+
+<h4>Purely Functional Data Structures</h4>
+
+<p>Purely functional data structures are <strong>always persistent</strong>, which means they handle updates in a memory-efficient way. This achieved by an implementation technique called <em>structural sharing</em>. A persistent data structure <em>shares</em> its internal <em>structure</em> between its versions, which is completely safe to do, since none of the versions can ever be changed or destroyed.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">val</span> <span class="n">xs</span> <span class="k">=</span> <span class="mi">1</span> <span class="o">::</span> <span class="mi">2</span> <span class="o">::</span> <span class="mi">3</span> <span class="o">::</span> <span class="nc">Nil</span>
+
+<span class="k">val</span> <span class="n">xxs</span> <span class="k">=</span> <span class="mi">0</span> <span class="o">::</span> <span class="n">xs</span> <span class="c1">// shares (not copies) the tail with xs</span>
+</code></pre></div>
+
+<p>Another heavily used implementation technique is <em>path copying</em>. It often requires to make some <em>deep</em> changes in a persistent data structure (i.e., insert, delete or update an element). To do so, we simply <em>copy</em> its nested structures (persistent data structures are often backed by <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">ADTs</a>) along the <em>path</em> to an element being modified. Both path copying and structural sharing aim to minimize the cost of modifying a persistent data structure: everything that <em>can&#39;t be shared</em> (via structural sharing) <em>is copied</em> (via path copying).</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">def</span> <span class="n">concat</span><span class="o">[</span><span class="kt">A</span><span class="o">](</span><span class="n">xs</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">],</span> <span class="n">ys</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> 
+  <span class="k">if</span> <span class="o">(</span><span class="n">xs</span><span class="o">.</span><span class="n">isEmpty</span><span class="o">)</span> <span class="n">ys</span>
+  <span class="k">else</span> <span class="n">xs</span><span class="o">.</span><span class="n">head</span> <span class="o">::</span> <span class="n">concat</span><span class="o">(</span><span class="n">xs</span><span class="o">.</span><span class="n">tail</span><span class="o">,</span> <span class="n">ys</span><span class="o">)</span> <span class="c1">// copies the path to ys</span>
+</code></pre></div>
+
+<p>Path copying is a quite lightweight operation that usually takes less than <code>O(n)</code> time to perform. Although, there are plenty of <em>specialized</em> data structures highly optimized for a concrete operation to make it in an amortized constant time (with no path copying). For example, <a href="http://ittc.ku.edu/%7Eandygill/papers/IntMap98.pdf">Fast Mergeable Integer Maps</a> and <a href="http://www.math.tau.ac.il/%7Ehaimk/adv-ds-2000/okasaki-kaplan-tarjan-sicomp.ps">Persistent Catenable Lists</a> support constant time <code>merge</code> and <code>concat</code> operations correspondingly.</p>
+
+<h4>Purely Functional Heaps</h4>
+
+<p>Tree-based data structures (i.e., trees, heaps and tries) are considered as low-hanging fruits for a functional setting, since they map directly to <a href="http://en.wikipedia.org/wiki/Algebraic_data_type">Algebraic Data Types</a>. At the first approximation, a typical functional implementation of a persistent tree looks as follows.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">sealed</span> <span class="k">trait</span> <span class="nc">Tree</span><span class="o">[</span><span class="kt">+A</span><span class="o">]</span> <span class="o">{</span> <span class="k">def</span> <span class="n">value</span><span class="k">:</span> <span class="kt">A</span> <span class="o">}</span>
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Branch</span><span class="o">[</span><span class="kt">+A</span><span class="o">](</span><span class="n">value</span><span class="k">:</span> <span class="kt">A</span><span class="o">,</span> <span class="n">left</span><span class="k">:</span> <span class="kt">Tree</span><span class="o">[</span><span class="kt">A</span><span class="o">],</span> <span class="n">right</span><span class="k">:</span> <span class="kt">Tree</span><span class="o">[</span><span class="kt">A</span><span class="o">])</span> <span class="k">extends</span> <span class="nc">Tree</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+<span class="k">case</span> <span class="k">object</span> <span class="nc">Leaf</span> <span class="k">extends</span> <span class="nc">Tree</span><span class="o">[</span><span class="kt">Nothing</span><span class="o">]</span>
+</code></pre></div>
+
+<p>There are several purely functional implementations of heaps such as <a href="https://github.com/vkostyukov/scalacaster/blob/master/src/heap/LeftistHeap.scala">Leftist Heap</a>, <a href="https://github.com/vkostyukov/scalacaster/blob/master/src/heap/SkewHeap.scala">Skew Heap</a> and <a href="https://github.com/vkostyukov/scalacaster/blob/master/src/heap/PairingHeap.scala">Pairing Heap</a> with good asymptotic bounds. Although, there are other heaps without proper functional implementations. The simplest of them are <a href="http://en.wikipedia.org/wiki/Binary_heap">Standard Binary Heaps</a>, which do not fit well into a functional environment since their reference implementation is backed by mutable arrays. Luckily, it&#39;s quite possible bring them into a purely functional world.</p>
+
+<h4>Standard Binary Heap</h4>
+
+<p>A <em>binary heap</em> (Williams, 1964) is a data structure that implements a priority queue interface and guarantees logarithmic running time for <code>insert</code>, <code>delete</code> operations and constant time access to <code>minimum</code>/<code>maximum</code> element. Binary heaps are commonly viewed as binary trees which satisfy two invariants:</p>
+
+<ol>
+<li>The <em>shape</em> invariant: the tree is a complete binary tree.</li>
+<li>The <em>min-heap</em> invariant: each node is less than or equal to each of its
+children.</li>
+</ol>
+
+<p>In Scala a binary min heap might be represented as abstract Heap class with two variants: <code>Branch</code> and <code>Leaf</code>.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">sealed</span> <span class="k">trait</span> <span class="nc">Heap</span><span class="o">[</span><span class="kt">+A</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">min</span><span class="k">:</span> <span class="kt">A</span>
+ 
+  <span class="k">def</span> <span class="n">left</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+  <span class="k">def</span> <span class="n">right</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span>
+  <span class="k">def</span> <span class="n">isEmpty</span><span class="k">:</span> <span class="kt">Boolean</span>
+ 
+  <span class="c1">// Both &#39;size&#39; and &#39;height&#39; are stored in each node.</span>
+  <span class="k">val</span> <span class="n">size</span><span class="k">:</span> <span class="kt">Int</span>
+  <span class="k">val</span> <span class="n">height</span><span class="k">:</span> <span class="kt">Int</span>
+<span class="o">}</span>
+
+<span class="k">case</span> <span class="k">object</span> <span class="nc">Leaf</span> <span class="k">extends</span> <span class="nc">Heap</span><span class="o">[</span><span class="kt">Nothing</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">size</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">val</span> <span class="n">height</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">def</span> <span class="n">isEmpty</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="o">}</span>
+ 
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Branch</span><span class="o">[</span><span class="kt">+A</span><span class="o">](</span><span class="n">min</span><span class="k">:</span> <span class="kt">A</span><span class="o">,</span> <span class="n">left</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Leaf</span><span class="o">,</span> <span class="n">right</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Leaf</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Heap</span><span class="o">[</span><span class="kt">A</span><span class="o">]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">isEmpty</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">false</span>
+  <span class="k">val</span> <span class="n">size</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="n">right</span><span class="o">.</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span>
+  <span class="k">val</span> <span class="n">height</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">max</span><span class="o">(</span><span class="n">left</span><span class="o">.</span><span class="n">height</span><span class="o">,</span> <span class="n">right</span><span class="o">.</span><span class="n">height</span><span class="o">)</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<p>Note that the height of a heap is defined as max height of its children plus one, while tge size of a heap is defined as the sum of its children sizes plus one; and both are calculated only once in a heap constructor. Also, to simplify calculations, suppose that singleton heap&#39;s height is <code>1</code>.</p>
+
+<p>Except for <code>height</code> and <code>size</code> operations, this signature looks like a classic functional implementation of a <a href="http://www.amazon.com/Purely-Functional-Structures-Chris-Okasaki/dp/0521663504">Binary Search Tree</a>. The two new operations are actually accessors to new fields in a heap - its height and size. These additional data should be accessible in constant time to define an efficient and simple <em>search criterion</em> for <code>insert</code> and <code>remove</code> operations.</p>
+
+<h4>Insertion in O(log n)</h4>
+
+<p>Insertion into a functional binary heap must not violate either of its invariants - neither the shape invariant nor the min-heap invariant. For this purpose two problems should be solved. First, to maintain the shape invariant a new node should be inserted in the first empty spot at the last level of the heap. Second, to maintain the min-heap invariant the inserted node should be <em>bubbled up</em> to the heap root until it becomes greater than its parent.</p>
+
+<p><img src="/images/designing-a-pfds/figure-1.png" alt="Figure 1">
+<center><small>Figure 1: Eliminating min-heap invariant violations.</small></center></p>
+
+<p>Bubbling up is quite a simple transformation that can be done at each level in constant time. There are two cases depending on whether the violation is at the left or right child (see &quot;Figure 1&quot; above). In either case the violation should be fixed by <em>swapping</em> two nodes - the root node and the child that violates the min-heap invariant. There is also a third case, when it doesn&#39;t violate anything. In this case, a heap should be simply rebuilt with given parameters. In other words, all affected nodes should be copied in order to maintain data structure persistence. More precisely, <code>bubbleUp</code> and <code>insert</code> operations might be defined as follows.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">def</span> <span class="n">bubbleUp</span><span class="o">[</span><span class="kt">B</span><span class="o">](</span><span class="n">x</span><span class="k">:</span> <span class="kt">B</span><span class="o">,</span> <span class="n">l</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">B</span><span class="o">],</span> <span class="n">r</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">B</span><span class="o">])(</span><span class="k">implicit</span> <span class="n">ord</span><span class="k">:</span> <span class="kt">Ordering</span><span class="o">[</span><span class="kt">B</span><span class="o">])</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span> <span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="k">match</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="o">(</span><span class="nc">Branch</span><span class="o">(</span><span class="n">y</span><span class="o">,</span> <span class="n">lt</span><span class="o">,</span> <span class="n">rt</span><span class="o">),</span> <span class="k">_</span><span class="o">)</span> <span class="k">if</span> <span class="o">(</span><span class="n">ord</span><span class="o">.</span><span class="n">gt</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">y</span><span class="o">))</span> <span class="k">=&gt;</span> 
+    <span class="nc">Branch</span><span class="o">(</span><span class="n">y</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">lt</span><span class="o">,</span> <span class="n">rt</span><span class="o">),</span> <span class="n">r</span><span class="o">)</span>
+  <span class="k">case</span> <span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">z</span><span class="o">,</span> <span class="n">lt</span><span class="o">,</span> <span class="n">rt</span><span class="o">))</span> <span class="k">if</span> <span class="o">(</span><span class="n">ord</span><span class="o">.</span><span class="n">gt</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">z</span><span class="o">))</span> <span class="k">=&gt;</span> 
+    <span class="nc">Branch</span><span class="o">(</span><span class="n">z</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">lt</span><span class="o">,</span> <span class="n">rt</span><span class="o">))</span>
+  <span class="k">case</span> <span class="o">(</span><span class="k">_</span><span class="o">,</span> <span class="k">_</span><span class="o">)</span> <span class="k">=&gt;</span> 
+    <span class="nc">Branch</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+<span class="o">}</span>
+
+<span class="k">def</span> <span class="n">insert</span><span class="o">[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span> <span class="kt">:</span> <span class="kt">Ordering</span><span class="o">](</span><span class="n">x</span><span class="k">:</span> <span class="kt">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">isEmpty</span><span class="o">)</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(???)</span> <span class="n">bubbleUp</span><span class="o">(</span><span class="n">min</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">.</span><span class="n">insert</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
+  <span class="k">else</span> <span class="n">bubbleUp</span><span class="o">(</span><span class="n">min</span><span class="o">,</span> <span class="n">left</span><span class="o">.</span><span class="n">insert</span><span class="o">(</span><span class="n">x</span><span class="o">),</span> <span class="n">right</span><span class="o">)</span>
+</code></pre></div>
+
+<p>The last thing to discuss is how to find a proper spot for a new node. The algorithm is based on a simple idea that binary heap will always be a <em>complete</em> tree if it tends to be a <em>perfect</em> tree each time it&#39;s modified. There are two definitions of perfect trees: <em>mathematical</em> and <em>recursive</em>. Mathematical definition: a perfect binary tree contains <code>2^(h+1) − 1</code> nodes, where <code>h</code> is the height of the tree. Recursive definition: a tree is perfect if its children are perfect trees of the same height. Combining these facts together, one can define search criteria which allow filling a heap level by level from left to right, thereby maintaining the shape invariant. In other words, new nodes should be inserted in such a way as to make the heap be a perfect tree. This can be simply achieved by the following requirements of the recursive definition, using the math definition as an efficient test on tree perfectness. Thus, the search criteria for insertion consist of four cases depending on whether the children are perfect trees and whether their heights are equal.</p>
+
+<p><img src="/images/designing-a-pfds/figure-2.png" alt="Figure 2">
+<center><small>Figure 2: Searching for the first empty spot in a heap.</small></center></p>
+
+<p>The straightforward implementation of this idea (see &quot;Figure 2&quot; above) with four cases looks as follows.</p>
+
+<div class="highlight"><pre><code class="scala"><span class="k">def</span> <span class="n">insert</span><span class="o">[</span><span class="kt">B</span> <span class="k">&gt;:</span> <span class="kt">A</span> <span class="kt">:</span> <span class="kt">Ordering</span><span class="o">](</span><span class="n">x</span><span class="k">:</span> <span class="kt">B</span><span class="o">)</span><span class="k">:</span> <span class="kt">Heap</span><span class="o">[</span><span class="kt">B</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">isEmpty</span><span class="o">)</span> <span class="nc">Heap</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">left</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">left</span><span class="o">.</span><span class="n">height</span><span class="o">)</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="n">bubbleUp</span><span class="o">(</span><span class="n">min</span><span class="o">,</span> <span class="n">left</span><span class="o">.</span><span class="n">insert</span><span class="o">(</span><span class="n">x</span><span class="o">),</span> <span class="n">right</span><span class="o">)</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">right</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">right</span><span class="o">.</span><span class="n">height</span><span class="o">)</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="n">bubbleUp</span><span class="o">(</span><span class="n">min</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">.</span><span class="n">insert</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">right</span><span class="o">.</span><span class="n">height</span> <span class="o">&lt;</span> <span class="n">left</span><span class="o">.</span><span class="n">height</span><span class="o">)</span>
+    <span class="n">bubbleUp</span><span class="o">(</span><span class="n">min</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">.</span><span class="n">insert</span><span class="o">(</span><span class="n">x</span><span class="o">))</span>
+  <span class="k">else</span> <span class="n">bubbleUp</span><span class="o">(</span><span class="n">min</span><span class="o">,</span> <span class="n">left</span><span class="o">.</span><span class="n">insert</span><span class="o">(</span><span class="n">x</span><span class="o">),</span> <span class="n">right</span><span class="o">)</span>
+</code></pre></div>
+
+<p>The <code>insert</code> operation performs <em>two</em> traversals along the search path of a heap. First, in a top-down manner it searches for the first empty spot in a heap thereby maintaining the shape invariant. Second, it <em>rebuilds</em> the affected nodes of a heap in a bottom-up manner thereby maintaining the min-heap invariant. Both traversal take less than <code>O(log n)</code>, since the longest possible path for perfect trees is <code>log n</code>. Thus, the time complexity of insertion is <code>O(log n)</code>.</p>
+
+<h4>Conclusion</h4>
+
+<p>The most exciting thing about purely functional data structures is that there is always room for new ideas and techniques. Even today, this direction still attracts researches and enthusiasts of functional programming. It&#39;s been 15 years, since <a href="http://www.amazon.com/Purely-Functional-Structures-Chris-Okasaki/dp/0521663504">Okasaki</a> and the field is <a href="http://cstheory.stackexchange.com/questions/1539/whats-new-in-purely-functional-data-structures-since-okasaki">still developing</a>: modern languages like Scala requires modern and efficient data structures with optimal purely functional implementations.</p>
+
+<p>This heap implementation in this post is based on a paper <a href="http://cstheory.stackexchange.com/questions/1539/whats-new-in-purely-functional-data-structures-since-okasaki">A Functional Approach for Standard Binary Heaps, 2013</a>. The full source code (including operations <code>remove</code> and <code>heapify</code>) is available <a href="http://arxiv.org/pdf/1312.4666v1.pdf">on Github</a>).</p>
+
+        </section>
+
+        
+
+        <footer class="post-footer">
+            <!-- If we want to display author's name and bio -->
+            
+                <section class="author">
+                    <header> <a href="/"> <img class="profile" src="/assets/images/profile.jpg" alt="Author's profile picture"></a></header>
+                    <article>
+                        <!-- Author Name -->
+                        <h4> Vladimir Kostyukov </h4>
+                        <!-- Author Bio -->
+                        <p> 
+                            Independent Researcher. Dependent Engineer.
+                            <br />
+                            Twitter: <a href="http://twitter.com/vkostyukov">@vkostyukov</a>, Blog: <a href="http://vkostyukov.ru">http://vkostyukov.ru</a>
+                        </p>
+                    </article>
+                </section>                
+            
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="http://twitter.com/share?text=Designing a Purely Functional Data Structure&amp;url=http://vkostyukov.ru/posts/designing-a-pfds"
+                    onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://vkostyukov.ru/posts/designing-a-pfds"
+                    onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://vkostyukov.ru/posts/designing-a-pfds"
+                   onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+            
+            
+            <section class="disqus">
+                <div id="disqus_thread"></div>
+                <script type="text/javascript">
+
+                    var disqus_shortname = 'vkostyukov'; 
+                    var disqus_developer = 0; // developer mode is on
+                    (function() {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+            </section>
+            
+        </footer>
+    </article>
+</main>
+
+
+    <footer class="site-footer">
+        <a class="subscribe icon-feed" href="/rss.xml"><span class="tooltip">Subscribe!</span></a>
+        <div class="inner">
+             <section class="copyright"> &copy; <a href="/">Vladimir Kostyukov</a></section>
+        </div>
+    </footer>
+
+    
+    <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
+    <script type="text/javascript" src="/assets/js/index.js"></script>
+
+    <!-- Google Analytics Tracking code -->
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-XXXXXXXX-X']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>   
+</body>
+</html>
