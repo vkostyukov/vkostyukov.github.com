@@ -8,7 +8,15 @@
     <title>Vladimir Kostyukov</title>
     <link>http://vkostyukov.ru</link>
     <description>Research &amp; Engineering</description>
-    <pubDate>Tue, 01 Apr 2014 10:00:00 -0000</pubDate>
+    <pubDate>Sat, 04 Apr 2015 10:00:00 -0000</pubDate>
+    <item>
+      <title>Designing a Purely Functional Data Structure</title>
+      <link>http://vkostyukov.ru/posts/designing-a-pfds</link>
+      <description>&lt;p&gt;Functional programming nicely leverages constraints on &lt;em&gt;how&lt;/em&gt; programs are written thereby promoting a clean and easy to reason about coding style. &lt;em&gt;Purely functional data structures&lt;/em&gt; are (surprisingly) built out of those constraints. They are &lt;strong&gt;persistent&lt;/strong&gt; (FP implies that both &lt;em&gt;old&lt;/em&gt; and &lt;em&gt;new&lt;/em&gt; versions of an updated object is available) and backed by &lt;strong&gt;immutable&lt;/strong&gt; objects (FP doesn&amp;#39;t support &lt;em&gt;destructive updates&lt;/em&gt;). Needless to say, it&amp;#39;s a challenge to design a purely functional data structure that meets performance requirements of its imperative sibling. Fortunately, it&amp;#39;s quite possible in most of the cases, even for those data structures whose reference implementations are backed by mutable arrays. This post precisely describes a process of designing a purely functional implementation technique for &lt;a href=&quot;http://en.wikipedia.org/wiki/Binary_heap&quot;&gt;Standard Binary Heaps&lt;/a&gt;, with the same asymptotic bounds as in an imperative setting.&lt;/p&gt;
+</description>
+      <pubDate>Sat, 04 Apr 2015 10:00:00 -0000</pubDate>
+      <dc:date>2015-04-04T10:00:00Z</dc:date>
+    </item>
     <item>
       <title>Combinatorial Algorithms in Scala</title>
       <link>http://vkostyukov.ru/posts/combinatorial-algorithms-in-scala</link>
@@ -41,6 +49,6 @@
       <pubDate>Sun, 19 Jan 2014 10:00:00 -0000</pubDate>
       <dc:date>2014-01-19T10:00:00Z</dc:date>
     </item>
-    <dc:date>2014-04-01T10:00:00Z</dc:date>
+    <dc:date>2015-04-04T10:00:00Z</dc:date>
   </channel>
 </rss>
