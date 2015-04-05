@@ -158,7 +158,7 @@ The `insert` operation performs _two_ traversals along the search path of a heap
 
 The most exciting thing about purely functional data structures is that there is always room for new ideas and techniques. Even today, this direction still attracts researches and enthusiasts of functional programming. It's been 15 years, since [Okasaki][11] and the field is [still developing][12]: modern languages like Scala require modern and efficient data structures with optimal purely functional implementations.
 
-The heap implementation in this post is based on a paper [A Functional Approach for Standard Binary Heaps, 2013][12]. The full source code (including operations `remove` and `heapify`) is available [on Github][13].
+The heap implementation in this post is based on a paper [A Functional Approach for Standard Binary Heaps, 2013][13]. The full source code (including operations `remove` and `heapify`) is available [on Github][14].
 
 [0]: http://en.wikipedia.org/wiki/Binary_heap
 [1]: http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Vector
