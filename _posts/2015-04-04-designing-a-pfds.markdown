@@ -114,13 +114,17 @@ Insertion into a functional binary heap must not violate either of its invariant
 Bubbling up is quite a simple transformation that can be done at each level in constant time. There are two cases depending on whether the violation is at the left or right child (see "Figure 1" above). In either case the violation should be fixed by _swapping_ two nodes - the root node and the child that violates the min-heap invariant. There is also a third case, when it doesn't violate anything. In this case, a heap should be simply rebuilt with given parameters. In other words, all affected nodes should be copied in order to maintain data structure persistence. More precisely, `bubbleUp` and `insert` operations might be defined as follows.
 
 {% highlight scala %}
-def bubbleUp[B](x: B, l: Heap[B], r: Heap[B])(implicit ord: Ordering[B]): Heap[B] = (l, r) match {
-  case (Branch(y, lt, rt), _) if (ord.gt(x, y)) => 
-    Branch(y, Branch(x, lt, rt), r)
-  case (_, Branch(z, lt, rt)) if (ord.gt(x, z)) => 
-    Branch(z, l, Branch(x, lt, rt))
-  case (_, _) => 
-    Branch(x, l, r)
+def bubbleUp[B : Ordering](x: B, l: Heap[B], r: Heap[B]): Heap[B] = {
+  val ordering = Ordering[B]; import ordering._
+
+  (l, r) match {
+    case (Branch(y, lt, rt), _) if (x > y) => 
+      Branch(y, Branch(x, lt, rt), r)
+    case (_, Branch(z, lt, rt)) if (x > z) => 
+      Branch(z, l, Branch(x, lt, rt))
+    case (_, _) => 
+      Branch(x, l, r)
+  }
 }
 
 def insert[B >: A : Ordering](x: B): Heap[B] =
@@ -154,7 +158,7 @@ The `insert` operation performs _two_ traversals along the search path of a heap
 
 The most exciting thing about purely functional data structures is that there is always room for new ideas and techniques. Even today, this direction still attracts researches and enthusiasts of functional programming. It's been 15 years, since [Okasaki][11] and the field is [still developing][12]: modern languages like Scala require modern and efficient data structures with optimal purely functional implementations.
 
-The heap implementation in this post is based on a paper [A Functional Approach for Standard Binary Heaps, 2013][12]. The full source code (including operations `remove` and `heapify`) is available [on Github][13]).
+The heap implementation in this post is based on a paper [A Functional Approach for Standard Binary Heaps, 2013][12]. The full source code (including operations `remove` and `heapify`) is available [on Github][13].
 
 [0]: http://en.wikipedia.org/wiki/Binary_heap
 [1]: http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Vector
