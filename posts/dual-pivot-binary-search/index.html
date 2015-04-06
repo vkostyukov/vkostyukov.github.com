@@ -22,21 +22,14 @@
 </head>
 <body class="home-template">
 
-    <header class="site-head">
-    <div class="vertical">
-        <div class="site-head-content" class="inner">
-            
-        </div>
-    </div>
-</header>
+    <main class="content" role="main">
+    <br />
+    <center/>
+      <a href='/'>[home]</a> 
+      <a href='/about/'>[about me]</a>
+      <a href="/rss.xml">[rss]</a>
+    </center>
 
-<center/>
-  <a href='/'>[home]</a> 
-  <a href='/about/'>[about me]</a>
-  <a href="/rss.xml">[rss]</a>
-</center>
-
-<main class="content" role="main">
     <article class="post">
 <!--
         <header class="post-header">
@@ -59,7 +52,7 @@
             
        	</span>
 
-        <h2 class="post-title">Dual-Pivot Binary Search</h2>
+        <h3 class="post-title">Dual-Pivot Binary Search</h3>
 
         <section class="post-content">
             <p>In 2009, Vladimir Yaroslavski introduced a <a href="http://iaroslavski.narod.ru/quicksort/DualPivotQuicksort.pdf">Dual-Pivot QuickSort</a> algorithm, which is currently the default sorting algorithm for primitive types in Java 8. The idea behind this algorithm is both simple and awesome. Instead of using single pivot element, it uses two pivots that divide an input array into three intervals (against two intervals in original <a href="http://en.wikipedia.org/wiki/Quicksort">QuickSort</a>). This allowed to decrease the height of <a href="http://www.cs.cornell.edu/courses/cs3110/2012sp/lectures/lec20-master/lec20.html">recursion tree</a> as well as reduce the number of comparisons. The post describes a similar dual-pivot approach but for a <a href="http://en.wikipedia.org/wiki/Binary_search_algorithm">BinarySearch</a> algorithm. Thus, our modified binary search algorithm has prefix <em>Dual-Pivot</em>.</p>
@@ -243,19 +236,12 @@ d.DPBS.benchmarkDPBS     avgt         5       69.563        8.410    ns/op
 </main>
 
 
-    <footer class="site-footer">
-        <a class="subscribe icon-feed" href="/rss.xml"><span class="tooltip">Subscribe!</span></a>
-        <div class="inner">
-             <section class="copyright"> &copy; <a href="/">Vladimir Kostyukov</a></section>
-        </div>
-    </footer>
-
-    
     <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
     <script type="text/javascript" src="/assets/js/index.js"></script>
 
     <!-- Google Analytics Tracking code -->
+    <!--
     <script type="text/javascript">
 
       var _gaq = _gaq || [];
@@ -269,5 +255,6 @@ d.DPBS.benchmarkDPBS     avgt         5       69.563        8.410    ns/op
       })();
 
     </script>   
+    -->
 </body>
 </html>

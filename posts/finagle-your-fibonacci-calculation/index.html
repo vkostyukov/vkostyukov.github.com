@@ -22,21 +22,14 @@
 </head>
 <body class="home-template">
 
-    <header class="site-head">
-    <div class="vertical">
-        <div class="site-head-content" class="inner">
-            
-        </div>
-    </div>
-</header>
+    <main class="content" role="main">
+    <br />
+    <center/>
+      <a href='/'>[home]</a> 
+      <a href='/about/'>[about me]</a>
+      <a href="/rss.xml">[rss]</a>
+    </center>
 
-<center/>
-  <a href='/'>[home]</a> 
-  <a href='/about/'>[about me]</a>
-  <a href="/rss.xml">[rss]</a>
-</center>
-
-<main class="content" role="main">
     <article class="post">
 <!--
         <header class="post-header">
@@ -59,7 +52,7 @@
             
        	</span>
 
-        <h2 class="post-title">Finagle Your Fibonacci Calculation</h2>
+        <h3 class="post-title">Finagle Your Fibonacci Calculation</h3>
 
         <section class="post-content">
             <p><a href="http://twitter.github.io/finagle/">Finagle</a> is an RPC library for JVM that allows you to develop service-based applications in a protocol-agnostic way. Formally, the Finagle library provides both asynchronous runtime via <a href="http://twitter.github.io/finagle/guide/Futures.html">futures</a> and protocol-independence via <a href="http://twitter.github.io/finagle/guide/ServerAnatomy.html">codecs</a>. In this post I will try to build a Finagle-powered distributed <a href="http://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci Numbers</a> calculator that scales up to thousands of nodes.</p>
@@ -306,19 +299,12 @@
 </main>
 
 
-    <footer class="site-footer">
-        <a class="subscribe icon-feed" href="/rss.xml"><span class="tooltip">Subscribe!</span></a>
-        <div class="inner">
-             <section class="copyright"> &copy; <a href="/">Vladimir Kostyukov</a></section>
-        </div>
-    </footer>
-
-    
     <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
     <script type="text/javascript" src="/assets/js/index.js"></script>
 
     <!-- Google Analytics Tracking code -->
+    <!--
     <script type="text/javascript">
 
       var _gaq = _gaq || [];
@@ -332,5 +318,6 @@
       })();
 
     </script>   
+    -->
 </body>
 </html>
