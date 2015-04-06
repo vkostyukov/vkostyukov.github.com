@@ -5,25 +5,14 @@ archive: false
 about: about/
 ---
 
-<header class="site-head">
-    <div class="vertical">
-        <div class="site-head-content" class="inner">
-            {% if site.logo %}
-                <a class="blog-logo" href="{{ site.url }}">
-                    <img src="{{ site.url }}/{{ site.logo}}" alt="{{ site.name}}" />
-                </a>
-            {% endif %}
-        </div>
-    </div>
-</header>
-
-<center/>
-  <a href='{{site.baseurl}}'>[home]</a> 
-  <a href='{{site.baseurl}}{{ page.about }}'>[about me]</a>
-  <a href="{{ site.baseurl }}rss.xml">[rss]</a>
-</center>
-
 <main class="content" role="main">
+    <br />
+    <center/>
+      <a href='{{site.baseurl}}'>[home]</a> 
+      <a href='{{site.baseurl}}{{ page.about }}'>[about me]</a>
+      <a href="{{ site.baseurl }}rss.xml">[rss]</a>
+    </center>
+
     <article class="post">
 <!--
         <header class="post-header">
@@ -46,7 +35,7 @@ about: about/
             {% endif %}
        	</span>
 
-        <h2 class="post-title">{{ page.title }}</h2>
+        <h3 class="post-title">{{ page.title }}</h3>
 
         <section class="post-content">
             {{content}}

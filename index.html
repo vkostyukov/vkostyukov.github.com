@@ -5,6 +5,7 @@ cover: false
 about: about/
 ---
 
+<!--
 <header class="site-head" {% if page.cover %} style="background-image: url({{ page.cover }})"{% endif%}>
     <div class="vertical">
         <div class="site-head-content" class="inner">
@@ -16,21 +17,22 @@ about: about/
         </div>
     </div>
 </header>
-
-<center/>
-  <a href='{{site.baseurl}}'>[home]</a> 
-  <a href='{{site.baseurl}}{{ page.about }}'>[about me]</a>
-  <a href="{{ site.baseurl }}rss.xml">[rss]</a>
-</center>
+-->
 
 <main class="content" role="main">
+    <br />
+    <center/>
+      <a href='{{site.baseurl}}'>[home]</a> 
+      <a href='{{site.baseurl}}{{ page.about }}'>[about me]</a>
+      <a href="{{site.baseurl}}rss.xml">[rss]</a>
+    </center>
 
     {% for post in paginator.posts %}
 
     <article class="post">
         <header class="post-header">
             <span class="post-meta"><time datetime="{{ post.date | date_to_string }}">{{ post.date | date_to_string }}</time> {{!tags prefix="on "}}</span>
-            <h2 class="post-title"><a href="{{ post.url}}">{{ post.title }}</a></h2>
+            <h3 class="post-title"><a href="{{ post.url}}">{{ post.title }}</a></h3>
 
         </header>
         <section class="post-excerpt">
