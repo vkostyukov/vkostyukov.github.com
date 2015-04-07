@@ -9,10 +9,10 @@ Functional programming nicely leverages constraints on _how_ programs are writte
 
 #### Immutability and Persistence
 
-_Immutability_ and _persistent_ are quite similar terms, which often substitute each other. We say [immutable vector][1] (in Scala) but mean [persistent vector][2] (in Clojure). These vector implementations are based on the same abstract data structure [Bit-Mapped Vector Trie][3] but named differently.
+_Immutability_ and _persistent_ are quite similar terms, which often substitute each other. We say [immutable vector][1] (in Scala) but mean [persistent vector][2] (in Clojure): both implementations are based on the same abstract data structure [Bit-Mapped Vector Trie][3] but named differently. Although, there is a slight difference between immutability and persistence as they apply to data structures.
 
-* Persistent objects support **multiple versions**
-* Immutable objects **aren't changeable**
+* Persistent data structures support **multiple versions**
+* Immutable data structures **aren't changeable**
 
 The difference between immutable and persistent data structures in how they handle updates. A persistent data structure handles updates in a _smart_ and memory-efficient way in order to keep its previous version unchanged, while an immutable data structure simply _doesn't care_ about updates at all (for example, Guava's [ImmutableList][4]  doesn't even support updates), since its previous version could be destroyed.
 
