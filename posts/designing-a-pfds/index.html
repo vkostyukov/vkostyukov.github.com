@@ -59,11 +59,11 @@
 
 <h4>Immutability and Persistence</h4>
 
-<p><em>Immutability</em> and <em>persistent</em> are quite similar terms, which often substitute each other. We say <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Vector">immutable vector</a> (in Scala) but mean <a href="http://clojuredocs.org/clojure_core/clojure.core/vector">persistent vector</a> (in Clojure). These vector implementations are based on the same abstract data structure <a href="http://en.wikipedia.org/wiki/Hash_array_mapped_trie">Bit-Mapped Vector Trie</a> but named differently.</p>
+<p><em>Immutability</em> and <em>persistent</em> are quite similar terms, which often substitute each other. We say <a href="http://www.scala-lang.org/api/current/index.html#scala.collection.immutable.Vector">immutable vector</a> (in Scala) but mean <a href="http://clojuredocs.org/clojure_core/clojure.core/vector">persistent vector</a> (in Clojure): both implementations are based on the same abstract data structure <a href="http://en.wikipedia.org/wiki/Hash_array_mapped_trie">Bit-Mapped Vector Trie</a> but named differently. Although, there is a slight difference between immutability and persistence as they apply to data structures.</p>
 
 <ul>
-<li>Persistent objects support <strong>multiple versions</strong></li>
-<li>Immutable objects <strong>aren&#39;t changeable</strong></li>
+<li>Persistent data structures support <strong>multiple versions</strong></li>
+<li>Immutable data structures <strong>aren&#39;t changeable</strong></li>
 </ul>
 
 <p>The difference between immutable and persistent data structures in how they handle updates. A persistent data structure handles updates in a <em>smart</em> and memory-efficient way in order to keep its previous version unchanged, while an immutable data structure simply <em>doesn&#39;t care</em> about updates at all (for example, Guava&#39;s <a href="https://github.com/google/guava/blob/master/guava/src/com/google/common/collect/ImmutableList.java">ImmutableList</a>  doesn&#39;t even support updates), since its previous version could be destroyed.</p>
