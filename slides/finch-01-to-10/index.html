@@ -618,8 +618,9 @@ def beLessThan[A](n: A)(implicit ev: Numeric[A]): ValidationRule[A]
 def beLongerThan(n: Int): ValidationRule[String]
 def beShorterThan(n: Int): ValidationRule[String]
 
-<div class="next">val a: RequestReader[Int] = param("a").as[Int] <mark>should</mark> beGreaterThan(10)</div>
-<div class="next">val b: RequestReader[String] =
+<div class="next">val a: RequestReader[Int] = 
+  param("a").as[Int] <mark>should</mark> beGreaterThan(10)
+</div><div class="next">val b: RequestReader[String] =
   param("b") <mark>should</mark>(beLongerThan(5) <mark>and</mark> beShorterThan(25))
 </div>
 		</code></pre>
@@ -692,9 +693,9 @@ val api: Endpoint[HttpRequest, HttpResponse] =
 	<section class="slide"><div>
 		<h2>What's next? (0.7 ... 1.0) </h2>
 		<ol>
-			<li>Heterogeneous <code>Router</code>s (powered by <a href="https://github.com/milessabin/shapeless">Shapeless</a>)</li>
-			<li class="next">Compose <code>Router</code>s and <code>RequestReader</code>s <br />(e.g. <code>Get / "users" ? param("id")</code>)</li>
-			<li class="next">Merge functionality of <code>RequestReader</code>s and <code>Router</code>s into a single abstraction</li>
+			<li>Heterogeneous Routers (powered by <a href="https://github.com/milessabin/shapeless">Shapeless</a>)</li>
+			<li class="next">Compose Routers and RequestReaders <br />(e.g. <code>Get / "users" ? param("id")</code>)</li>
+			<li class="next">Merge functionality of RequestReaders and Routers into a single abstraction</li>
 		</ol>
 	</div></section>
 
