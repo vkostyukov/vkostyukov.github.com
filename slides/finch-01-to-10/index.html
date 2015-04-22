@@ -155,7 +155,7 @@ Http.serve("8080", router)</code></pre>
 
 	<section class="slide"><div>
 		<h2>Happy Birthday, Finch!</h2>
-		<img src="pictures/gist.png" class="place">
+		<img src="pictures/gist.png" class="place" height="20%">
 	</div></section>
 
 
@@ -185,6 +185,20 @@ Http.serve("8080", router)</code></pre>
 	<section class="slide"><div>
 		<img src="pictures/finch-logo.png" class="place" height="60%">
 	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Who is using Finch?</h2>
+		<ol>
+			<li><a href="http://www.jusbrasil.com.br/bem-vindo">JusBrasil</a></li>
+			<li><a href="http://sabrelabs.com">Sabre Labs</a></li>
+			<li><a href="http://spright.com">Spright</a></li>
+			<li><i>You?</i></li>
+		</ol>
+	</div></section>
+
 
 
 
@@ -228,7 +242,7 @@ val tickets = Endpoint[HttpRequest, HttResponse] {
 		<h2>Built-in RequestReaders</h2>
 <pre><code class="scala">def RequiredParam(name: String): RequestReader[String] = ???
 def OptionalParam(name: String): RequestReader[Option[String]] = ???
-def RequeredIntParam(name: String): RequestReader[Int] = ???
+def RequiredIntParam(name: String): RequestReader[Int] = ???
 def OptionalItParam(name: String): RequestReader[Int] = ???
 ....</code></pre>
 	</div></section>
@@ -310,7 +324,7 @@ object NoContent extends ResponseBuilder(Status.NoContent)
 
 	<section class="slide"><div>
 		<h2>ResponseBuilders Usage</h2>
-<pre><code class="scala">val ok: HttpResponse = Ok("plain/text")
+<pre><code class="scala">val ok: HttpResponse = Ok("plain text")
 val notFound: HttpResponse = NotFound(JSONObject(Map("id" -> 100)))
 val noContent: HttpResponse = NoContent()
 
@@ -323,35 +337,18 @@ val noContent: HttpResponse = NoContent()
 
 
 	<section class="slide"><div>
-		<h2>EncodeResponse</h2>
+		<h2>EncodeResponse & ResponseBuilder</h2>
 <pre><code class="scala">trait EncodeResponse[-A] {
   def apply(rep: A): String
   def contentType: String
 }
-object EncodeResponse {
-  def apply[A](ct: String)(f: String => A): EncodeResponse[A] = ???
 
-  implicit val <mark>encodeString</mark>: EncodeResponse[String] = 
-    EncodeResponse("plain/text")(s => s)
-}</code></pre>
-	</div></section>
-
-
-
-	<section class="slide"><div>
-		<h2>ResponseBuilder</h2>
-<pre><code class="scala">case class ResponseBuilder(status: Status) {
+case class ResponseBuilder(status: Status) {
   def apply[A: <mark>EncodeResponse</mark>](body: A): HttpResponse = ???
 }
-<div class="next">
-implicit val e: EncodeResponse[JSONType] = 
-  EncodeResponse("application/json")(_.toString)
-
-val rep: HttpResponse = 
-  Ok(JSONObject(Map("id" -> 100, "name" -> "Cheburashka")))
-</div>
 </code></pre>
 	</div></section>
+
 
 
 
@@ -382,32 +379,13 @@ val user: RequestReader[User] = RequiredBody.map { body =>
 
 
 	<section class="slide"><div>
-		<h2>DecodeRequest</h2>
+		<h2>DecodeRequest & Body Readers</h2>
 <pre><code class="scala">trait DecodeRequest[+A] {
   def apply(req: String): Try[A]
  }
 
- object DecodeRequest {
-   def apply[A](f: String => Try[A]): DecodeRequest[A] = ???
-
-   implicit val <mark>decodeString</mark>: DecodeRequest[String] = 
-     DecodeRequest(s => Return(s))
-}
-</code></pre>
-	</div></section>
-
-
-
-	<section class="slide"><div>
-		<h2>Body Readers (Improved)</h2>
-<pre><code class="scala">def RequiredBody[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
+def RequiredBody[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 def OptionalBody[A: <mark>DecodeRequest</mark>]: RequestReader[Option[A]] = ???
-
-<div class="next">implicit val e: DecodeRequest[JSONType] = 
-  DecodeRequest(Try(JSON.parseFull(_)))
-
-val json = RequiredBody[JSONType]
-</div>
 </code></pre>
 	</div></section>
 
@@ -446,7 +424,7 @@ implicit val decodeBoolean: DecodeRequest[Boolean] =
 <section class="slide"><div>
 		<h2>Decode all the things!</h2>
 <pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
-  def as[A: DecodeRequest]: RequestReader[A] = ???
+  def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
 <div class="next">val a = RequiredIntParam("a")
@@ -462,7 +440,7 @@ val c = RequredBody[Json]
 <section class="slide"><div>
 		<h2>Decode all the things!</h2>
 <pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
-  def as[A: DecodeRequest]: RequestReader[A] = ???
+  def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
 <mark class="red">val a = RequiredIntParam("a")</mark>
@@ -474,10 +452,11 @@ val c = RequredBody[Json]
 
 
 
+
 	<section class="slide"><div>
 		<h2>Decode all the things!</h2>
 <pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
-  def as[A: DecodeRequest]: RequestReader[A] = ???
+  def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
 <mark>val a = RequiredParam("a").as[Int]</mark>
@@ -491,7 +470,7 @@ val c = RequredBody[Json]
 	<section class="slide"><div>
 		<h2>Decode all the things!</h2>
 <pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
-  def as[A: DecodeRequest]: RequestReader[A] = ???
+  def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
 <mark>val a = param("a").as[Int]</mark>
@@ -509,7 +488,7 @@ val c = RequredBody[Json]
 val user: RequestReader[User] = for {
   age <- param("age").as[Int]
   name <- param("name")
-  city <- paramOption("city").withDefault("San Francisco")
+  city <- paramOption("city").<mark>withDefault</mark>("San Francisco")
 } yield User(age, name, city)
 </code></pre>
 	</div></section>
@@ -538,7 +517,7 @@ val user: RequestReader[User] = for {
 <pre><code class="scala">case class ~[A, B](a: A, b: B)
 
 trait RequestReader[A] {
-  def <mark>~</mark>[B](that: RequestReader[B]): RequestReader[A ~ B] = ???
+  def <mark>~</mark>[B](that: RequestReader[B]): RequestReader[<mark>A ~ B</mark>] = ???
 }
 </code></pre>
 	</div></section>
@@ -549,7 +528,7 @@ trait RequestReader[A] {
 			<h2>Applicative RequestReader</h2>
 <pre><code class="scala">case class User(age: Int, name: String, city: Option[String])
 
-val a: RequestReader[Int ~ String ~ String] =
+val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
   param("age").as[Int] <mark>~</mark>
   param("name") <mark>~</mark>
   paramOption("city").withDefault("San Francisco")
@@ -565,7 +544,7 @@ val b: RequestReader[User] = a.map {
 			<h2>Applicative RequestReader</h2>
 <pre><code class="scala">case class User(age: Int, name: String, city: Option[String])
 
-val a: RequestReader[Int ~ String ~ String] =
+val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
   param("age").as[Int] <mark>~</mark>
   param("name") <mark>~</mark>
   paramOption("city").withDefault("San Francisco")
@@ -582,7 +561,7 @@ val a: RequestReader[Int ~ String ~ String] =
 			<h2>Applicative RequestReader</h2>
 <pre><code class="scala">case class User(age: Int, name: String, city: Option[String])
 
-val a: RequestReader[Int ~ String ~ String] =
+val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
   param("age").as[Int] <mark>~</mark>
   param("name") <mark>~</mark>
   paramOption("city").withDefault("San Francisco")
@@ -605,11 +584,45 @@ val a: RequestReader[Int ~ String ~ String] =
 		<h2>Combinator <mark>~></mark></h2>
 		<p>Can we treat <code>A ~ B ~ .. ~ Z => \_(ツ)_/</code> as <code>(A, B, .., Z) => \_(ツ)_/</code>?</p>
 		<pre class="next"><code class="scala">implicit class Arrow26(rr: RequestReader[A ~ B ~ .. ~ Z]) {
-  def ~>[A0](f: (A, B, .., Z) => A0): RequestReader[A0] =
+  def <mark>~></mark>[A0](f: (A, B, .., Z) => A0): RequestReader[A0] =
     rr.map {
       case a ~ b ~ .. ~ z => f(a, b, ..., z)
     }
 }</code></pre>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Composable ValidationRule</h2>
+		<pre><code class="scala">trait ValidationRule[A] {
+  def apply(value: A): Boolean
+  def <mark>and</mark>(that: ValidationRule[A]): ValidationRule[A] = ???
+  def <mark>or</mark>(that: ValidationRule[A]): ValidationRule[A] = ???
+}
+
+trait RequestReader[A] {
+  def <mark>should</mark>(rule: VlidationRule[A]): RequestReader[A] = ???
+  def <mark>shouldNot</mark>(rule: VlidationRule[A]): RequestReader[A] = ???
+}</code></pre>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Built-in ValidationRules</h2>
+		<pre><code class="scala">def beGreaterThan[A](n: A)(implicit n: Numeric[A]): ValidationRule[A]
+def beLessThan[A](n: A)(implicit ev: Numeric[A]): ValidationRule[A]
+def beLongerThan(n: Int): ValidationRule[String]
+def beShorterThan(n: Int): ValidationRule[String]
+
+<div class="next">val a: RequestReader[Int] = param("a").as[Int] <mark>should</mark> beGreaterThan(10)</div>
+<div class="next">val b: RequestReader[String] =
+  param("b") <mark>should</mark>(beLongerThan(5) <mark>and</mark> beShorterThan(25))
+</div>
+		</code></pre>
 	</div></section>
 
 
@@ -634,28 +647,12 @@ trait Router[+A] {
 	<section class="slide"><div>
 		<h2>Built-in Routers</h2>
 		<pre><code class="scala">object Get extends Router[Nothing] { ... }
-object Post extends Router[Nothing] { ... }
-object Patch extends Router[Nothing] { ... }
-object * extends Router[Nothing] { ... }
+...
+implicit def stringToRouter(s: String): Router[Nothing] = ???
 ...
 object int extends Router[Int] { ... }
-object string extends Router[String] { ... }
-object boolean extends Router[Boolean] { ... }
-...</code></pre>
-	</div></section>
-
-
-
-
-	<section class="slide"><div>
-		<h2>Implicit Routers</h2>
-<pre><code class="scala">implicit def intToRouter(i: Int): Router[Nothing] = ???
-implicit def stringToRouter(s: String): Router[Nothing] = ???
-implicit def booleanToRouter(b: Boolean): Router[Nothing] = ???
-<div class="next">
-case class Ticket(id: Int)
-val a: Router[Ticket] = Get <mark>/</mark> "tickets" <mark>/</mark> 10 <mark>/></mark> Ticket(10)
-</div>
+...
+object * extends Router[Nothing] { ... }
 </code></pre>
 	</div></section>
 
@@ -664,28 +661,16 @@ val a: Router[Ticket] = Get <mark>/</mark> "tickets" <mark>/</mark> 10 <mark>/><
 
 	<section class="slide"><div>
 		<h2>Routers Usage</h2>
-<pre><code class="scala">case class User(id: Int)
-
-val a: Router[User] = Get / ("users" | "user") / int("id") /> User
-val b: Router[HttpResponse] = * / "health" /> Ok()
-
-<div class="next"><mark class="red">val ab: Router[?] = a | b</mark> // does not compile</div>
+<pre><code class="scala">val a: Router[Ticket] = 
+  Get <mark>/</mark> ("tickets" | "ticket") <mark>/</mark> 10 <mark>/></mark> Ticket(10)
+<div class="next">
+val b: Router[HttpResponse] = 
+  * / "health" /> Ok() <mark>|</mark>
+  Get / "blackhole" /> NotFound("There is no blackhole on this server.")
+</div>
 </code></pre>
 	</div></section>
 
-
-
-	<section class="slide"><div>
-		<h2>Endpoints v2.0</h2>
-<pre><code class="scala">type Endpoint[A, B] = Router[Service[A, B]]
-type Api = Endpoint[HttRequest, HttResponse]
-
-val a: Api = Get / "users" / int /> GetUserService
-val b: Api = Get / "tickets" / int /> GetTicketsService
-
-<div class="next">val ab: Api = a <mark>|</mark> b</div>
-</code></pre>
-	</div></section>
 
 
 
