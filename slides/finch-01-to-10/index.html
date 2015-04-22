@@ -370,7 +370,7 @@ val b: HttpResponse = Ok(User(100, "Ivan"))
 <pre><code class="scala">val RequiredBody: RequestReader[String] = ???
 val OptionalBody: RequestReader[Option[String]] = ???
 
-val user: RequestReader[User] = RequiredBody.map { body =>
+val user: RequestReader[User] = RequiredBody.<mark>map</mark> { body =>
   // TODO parse User from String
 }
 </code></pre>
@@ -583,7 +583,7 @@ val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
 	<section class="slide"><div>
 		<h2>Combinator <mark>~></mark></h2>
 		<p>Can we treat <code>A ~ B ~ .. ~ Z => \_(ツ)_/</code> as <code>(A, B, .., Z) => \_(ツ)_/</code>?</p>
-		<pre class="next"><code class="scala">implicit class Arrow26(rr: RequestReader[A ~ B ~ .. ~ Z]) {
+		<pre class="next"><code class="scala">implicit class Arrow26(rr: RequestReader[<mark>A ~ B ~ .. ~ Z</mark>]) {
   def <mark>~></mark>[A0](f: (A, B, .., Z) => A0): RequestReader[A0] =
     rr.map {
       case a ~ b ~ .. ~ z => f(a, b, ..., z)
@@ -650,9 +650,10 @@ trait Router[+A] {
 ...
 implicit def stringToRouter(s: String): Router[Nothing] = ???
 ...
-object int extends Router[Int] { ... }
-...
 object * extends Router[Nothing] { ... }
+...
+object int extends Router[Int] { ... }
+object string extends Router[String] { ... }
 </code></pre>
 	</div></section>
 
@@ -667,6 +668,20 @@ object * extends Router[Nothing] { ... }
 val b: Router[HttpResponse] = 
   * / "health" /> Ok() <mark>|</mark>
   Get / "blackhole" /> NotFound("There is no blackhole on this server.")
+</div>
+</code></pre>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Endpoints v2.0</h2>
+<pre><code class="scala">type Endpoint[A, B] = Router[<mark>Service</mark>[A, B]]
+<div class="next">
+val api: Endpoint[HttpRequest, HttpResponse] = 
+  Get / "users" /> Service.mk { req: HttpRequest => ... } <mark>|</mark>
+  Get / "tickets" /> Service.mk { req: HttpRequest => ... }
 </div>
 </code></pre>
 	</div></section>
