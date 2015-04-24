@@ -427,10 +427,9 @@ implicit val decodeBoolean: DecodeRequest[Boolean] =
   def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
-<div class="next">val a = RequiredIntParam("a")
+val a = RequiredIntParam("a")
 val b = RequiredBooleanParam("b")
 val c = RequredBody[Json]
-</div>
 </code></pre>
 	</div></section>
 
