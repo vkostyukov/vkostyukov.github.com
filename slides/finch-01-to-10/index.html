@@ -481,6 +481,21 @@ val c = RequredBody[Json]
 
 
 
+
+	<section class="slide"><div>
+		<h2>Custom Decoders (e.g. JodaTime)</h2>
+<pre><code class="scala">implicit val dateTimeDecoder: DecodeRequest[<mark>DateTime</mark>] = 
+  DecodeRequest(s => Try(new DateTime(s.toLong)))
+<div class="next">
+val interval: RequestReader[Interval] = for {
+  start <- param("start").as[<mark>DateTime</mark>]
+  end <- param("end").as[<mark>DateTime</mark>]
+} yield Interval(start, end)
+</div>
+</code></pre>
+	</div></section>
+
+
 		<section class="slide"><div>
 			<h2>Monadic RequestReader</h2>
 <pre><code class="scala">case class User(age: Int, name: String, city: Option[String])
