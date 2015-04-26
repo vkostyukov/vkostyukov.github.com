@@ -242,10 +242,12 @@ val tickets = Endpoint[HttpRequest, HttResponse] {
 	<section class="slide"><div>
 		<h2>Built-in RequestReaders</h2>
 <pre><code class="scala">def RequiredParam(name: String): RequestReader[String] = ???
-def OptionalParam(name: String): RequestReader[Option[String]] = ???
 def RequiredIntParam(name: String): RequestReader[Int] = ???
-def OptionalItParam(name: String): RequestReader[Int] = ???
-....</code></pre>
+...
+def OptionalParam(name: String): RequestReader[Option[String]] = ???
+def OptionalIntParam(name: String): RequestReader[Option[Int]] = ???
+...
+</code></pre>
 	</div></section>
 
 
