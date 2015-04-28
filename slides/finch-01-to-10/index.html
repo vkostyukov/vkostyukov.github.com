@@ -206,7 +206,7 @@ Http.serve("8080", router)</code></pre>
 	<section class="slide"><div>
 		<h2>Endpoints</h2>
 <pre><code class="scala">trait Endpoint[A, B] {
-  def route: PartialFunction[(HttpMethod, Path), Service[A, B]]
+  def route: PartialFunction[HttpRequest, Service[A, B]]
   def <mark>orElse</mark>(that: Endpoint[A, B]): Endpoint[A, B] = ???
 }</code></pre>
 	</div></section>
@@ -426,7 +426,7 @@ implicit val decodeBoolean: DecodeRequest[Boolean] =
 
 <section class="slide"><div>
 		<h2>Decode all the things!</h2>
-<pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
+<pre><code class="scala">implicit class RROps[R](rr: RequestReader[String]) {
   def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
@@ -441,7 +441,7 @@ val c = RequredBody[Json]
 
 <section class="slide"><div>
 		<h2>Decode all the things!</h2>
-<pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
+<pre><code class="scala">implicit class RROps[R](rr: RequestReader[String]) {
   def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
@@ -457,7 +457,7 @@ val c = RequredBody[Json]
 
 	<section class="slide"><div>
 		<h2>Decode all the things!</h2>
-<pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
+<pre><code class="scala">implicit class RROps[R](rr: RequestReader[String]) {
   def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
@@ -471,7 +471,7 @@ val c = RequredBody[Json]
 
 	<section class="slide"><div>
 		<h2>Decode all the things!</h2>
-<pre><code class="scala">implicit class RROps[R](val rr: RequestReader[String]) {
+<pre><code class="scala">implicit class RROps[R](rr: RequestReader[String]) {
   def as[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 }
 
