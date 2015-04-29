@@ -30,11 +30,11 @@
 		<img src="pictures/finch-logo.png" alt="">
 		<footer>
 Hi Everybody! Great to see so many people interested in Finagle and projects around it. My name is Vladimir and this the first time I’m speaking at SF Scala but no the first time I’m talking about Finch. So, hopefully it will go well. You’re probably wondering who on earth am I? I’m the creator of the Finch library and a full time Scala developer here at Twitter, on Finagle team. And to prevent you questions: 1) no, I don’t work on Finch full-time and 2) no we don’t use Finch internally at Twitter. Finch is just one of those pet-projects we developers do in spare time for fun. So, if Finch will fail for you  - don’t blame me, I don’t make any money on it.
-
+<br />
 Alright. What this talk is about? I’m going to give you a brief overview of the history of Finch. I will show you its evolution starting from a 40-lines Gist file to the full-featured library that is already used in production by several companies. I’ll focus on the most notable design decisions I and other contributors made. 
-
+<br />
 The current version is 0.6. We’re kinda in the middle of the journey to the first stable version, but it feels like we’ve found a great path that will make it to 1.0, which will hopefully happen this summer. My talk is about where it came from and what is it now. And Travis in the next talk, will show you where is it going.
-
+<br />
 Before we start, how many of you folks have heard about Finch before? How many of you gave it a star on Github? Not much, huh? Well, you know what to.
 		</footer>
 		<style>
@@ -74,13 +74,13 @@ Before we start, how many of you folks have heard about Finch before? How many o
 		</ol>
 <footer>
 Almost an year ago, I was working on a REST API backend for a small startup. In the very beginning I wanted to use Finagle for this, since I just got a Twitter job offer and was trying to get familiar with the stack. 
-
+<br />
 But I quickly realized that the raw finagle-http abstractions are quite low-level and rarely composable in the wild. 
-
+<br />
 I also didn’t want to use Finatra, since I wanted to stay close to the Finagle bare metal API as much as possible. 
-
+<br />
 I was mostly thinking about something immutable, highly composable, simple and small. 
-
+<br />
 I wanted to apply functional programming to finagle-http and build something useful for the real-world problems. Something that an average Scala programmer (who basically doesn’t know the category theory) can efficiently use and, more importantly, have fun with.
 </footer>
 
@@ -90,6 +90,11 @@ I wanted to apply functional programming to finagle-http and build something use
 
 	<section class="slide shout"><div>
 		<h2>Finagle HTTP(x)</h2>
+<footer>
+Before we start talking about Finch, let’s see how we can use Finagle HTTP in the REST API setting. 
+<br />
+How many of you are currently running Finagle HTTP in production? You will probably find a lot of familiar patterns on the next slides. And, I think you would agree with me that Finagle is quite sufficient for HTTP APIs but feels a bit of low level and verbose.
+</footer>
 	</div></section>
 
 
