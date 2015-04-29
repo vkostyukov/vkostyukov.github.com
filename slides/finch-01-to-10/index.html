@@ -30,11 +30,11 @@
 		<img src="pictures/finch-logo.png" alt="">
 		<footer>
 Hi Everybody! Great to see so many people interested in Finagle and projects around it. My name is Vladimir and this the first time I’m speaking at SF Scala but no the first time I’m talking about Finch. So, hopefully it will go well. You’re probably wondering who on earth am I? I’m the creator of the Finch library and a full time Scala developer here at Twitter, on Finagle team. And to prevent you questions: 1) no, I don’t work on Finch full-time and 2) no we don’t use Finch internally at Twitter. Finch is just one of those pet-projects we developers do in spare time for fun. So, if Finch will fail for you  - don’t blame me, I don’t make any money on it.
-<br />
-Alright. What this talk is about? I’m going to give you a brief overview of the history of Finch. I will show you its evolution starting from a 40-lines Gist file to the full-featured library that is already used in production by several companies. I’ll focus on the most notable design decisions I and other contributors made. 
-<br />
+--
+Alright. What this talk is about? I’m going to give you a brief overview of the history of Finch. I will show you its evolution starting from a 40-lines Gist file to the full-featured library that is already used in production by several companies. I’ll focus on the most notable design decisions I and other contributors made.
+--
 The current version is 0.6. We’re kinda in the middle of the journey to the first stable version, but it feels like we’ve found a great path that will make it to 1.0, which will hopefully happen this summer. My talk is about where it came from and what is it now. And Travis in the next talk, will show you where is it going.
-<br />
+--
 Before we start, how many of you folks have heard about Finch before? How many of you gave it a star on Github? Not much, huh? Well, you know what to.
 		</footer>
 		<style>
@@ -74,13 +74,13 @@ Before we start, how many of you folks have heard about Finch before? How many o
 		</ol>
 <footer>
 Almost an year ago, I was working on a REST API backend for a small startup. In the very beginning I wanted to use Finagle for this, since I just got a Twitter job offer and was trying to get familiar with the stack. 
-<br />
+--
 But I quickly realized that the raw finagle-http abstractions are quite low-level and rarely composable in the wild. 
-<br />
+--
 I also didn’t want to use Finatra, since I wanted to stay close to the Finagle bare metal API as much as possible. 
-<br />
+--
 I was mostly thinking about something immutable, highly composable, simple and small. 
-<br />
+--
 I wanted to apply functional programming to finagle-http and build something useful for the real-world problems. Something that an average Scala programmer (who basically doesn’t know the category theory) can efficiently use and, more importantly, have fun with.
 </footer>
 
@@ -92,7 +92,7 @@ I wanted to apply functional programming to finagle-http and build something use
 		<h2>Finagle HTTP(x)</h2>
 <footer>
 Before we start talking about Finch, let’s see how we can use Finagle HTTP in the REST API setting. 
-<br />
+--
 How many of you are currently running Finagle HTTP in production? You will probably find a lot of familiar patterns on the next slides. And, I think you would agree with me that Finagle is quite sufficient for HTTP APIs but feels a bit of low level and verbose.
 </footer>
 	</div></section>
@@ -111,6 +111,9 @@ How many of you are currently running Finagle HTTP in production? You will proba
     Future.value(rep)
   }
 }</code></pre>
+<footer>
+Here is a typical Finagle service (or microservice if you will) that emulates fetching a user by its identity.
+</footer>
 	</div></section>
 
 
@@ -127,6 +130,9 @@ How many of you are currently running Finagle HTTP in production? You will proba
     Future.value(rep)
   }
 }</code></pre>
+<footer>
+First of all, we have to fetch the query-string param “name”, which is an option, so we have to provide a default value for it. This line looks “okeish” … for Java programmers. As Scala programmers, we might want something better here, something like a composable function that takes a param name and returns its value. So we can efficiently reuse it and not write this line every time.
+</footer>
 	</div></section>
 
 
@@ -143,6 +149,9 @@ How many of you are currently running Finagle HTTP in production? You will proba
     Future.value(rep)
   }
 }</code></pre>
+<footer>
+What’s next? We have to build a response. Well, I love Finagle a lot, but I can’t say the same about the HTTP package. What’s so bad about it? Actually, nothing. Except for we wrote 3 lines of a mutable Java code to build a simple JSON response. In Scala we will likely end up with something like a polymorphic function that takes an arbitrary type and builds an HTTP response of it. So we can omit all this boilerplate code here.
+</footer>
 	</div></section>
 
 
@@ -156,6 +165,9 @@ How many of you are currently running Finagle HTTP in production? You will proba
   }
 
 Http.serve("8080", router)</code></pre>
+<footer>
+Finally, that’s how we do routing in Finagle HTTP. We have this fancy routing DSL available out of the box in Finagle. Overall, this looks pretty good: we extensively use Scala features here, like pattern matching to extract route details.
+</footer>
 	</div></section>
 
 
@@ -169,12 +181,22 @@ Http.serve("8080", router)</code></pre>
   }
 
 Http.serve("8080", router)</code></pre>
+<footer>
+But, routing service is just a service, which you can do nothing about rather than call it. We probably want something more flexible here, so we can compose two routers together, since we should be able to group similar routers and, more importantly, reuse them if needed. 
+--
+The bottom line is that while it’s totally possible to use Finagle HTTP in the REST API setting it doesn’t really look like an idiomatic Scala style, which promotes immutable and composable abstractions that easy to reason about.
+</footer>
 	</div></section>
 
 
 
 	<section class="slide shout"><div>
 		<h2>Finch: REST APIs with Finagle</h2>
+<footer>
+That’s is why I started working on Finch, a Scala idiomatic version of the Finagle HTTP. 
+--
+Finch is aimed to make a life easier with Finagle HTTP, so if you’re currently happy with Finatra you probably don’t need Finch. Finch is for those who’re unhappy with Finagle HTTP. And the nice thing about Finch is that it’s not a framework but a library, so you can incrementally integrate its primitives (which are just simple functions and types) into an existing Finagle services. Finch doesn’t force you to follow some concrete style of organizing your code (like placing everything into a special controllers): frameworks usually do it. With Finch it’s totally up to you how to write your services and how to organize your code. So it fits well into an any existing style.
+</footer>
 	</div></section>
 
 
@@ -182,12 +204,18 @@ Http.serve("8080", router)</code></pre>
 	<section class="slide"><div>
 		<h2>Happy Birthday, Finch!</h2>
 		<img src="pictures/gist.png" class="place" height="20%">
+<footer>
+This Gist file published an year ago is the first ever version of Finch. As for today, Finch is still a very young project but it’s rapidly approaching its first stable version. This doesn’t mean that you can’t use Finch right now. In fact, most of the Finch user have started to use it from its early versions because, I believe, Finch is doing great job on making its API changes smooth and most of the time invisible for the end users. So, don’t be scared of trying of current version of Finch, which 0.6, I promise you, updating to 1.0 won’t break your code … much.
+</footer>
 	</div></section>
 
 
 
 	<section class="slide shout"><div>
 		<h2>Finch = <mark>F</mark>inagle + <mark>inch</mark>(1 inch = 0.0254 m)</h2>
+<footer>
+You’re probably wondering why Finch? Yes, we love birds at Twitter, but Finch is an outside project so I could pick any non-bird name. In fact, the bird name happened accidentally here. I was thinking about a name that says both it’s about Finagle and it’s something really small. I was kinda hopping to build a small number of abstractions on top of Finagle, something like tiny tini Finagle clone for a particular problem. And I found this combinations: Finagle + Inch, which is unit of length; pretty small thing actually.
+</footer>
 	</div></section>
 
 
@@ -204,12 +232,18 @@ Http.serve("8080", router)</code></pre>
 			font-size:80px;
 			}
 		</style>
+<footer>
+And it turned out it’s a bird! 
+</footer>
 	</div></section>
 `
 
 
 	<section class="slide"><div>
 		<img src="pictures/finch-logo.png" class="place" height="60%">
+<footer>
+So, we have this beautiful bird on the logo right now. BTW, I have three Finch stickers that I’m going to exchange for questions in the end of the talk. Please, be ready. First come - first served.
+</footer>
 	</div></section>
 
 
@@ -224,6 +258,11 @@ Http.serve("8080", router)</code></pre>
 			<li><a href="https://www.sofi.com/">SoFi</a></li>
 			<li><i>You?</i></li>
 		</ol>
+<footer>
+As for today, 4 companies are officially using Finch in production. And also, I have some information (from untrusted sources) that at least 4 other companies are currently developing their products in Finch, but haven’t launched yet. If you’re already using Finch, please make it to the adopters list. This keeps the contributors motivated, so we can continue making Finch more awesome.
+--
+The official part is over and we’re going to start looking at the code. I have to warn you: there are almost 40 slides with bloody Scala code we have to discuss tonight. The best way to survive this talk is to grab some beer and probably get drunk at little bit. 
+</footer>
 	</div></section>
 
 
@@ -235,6 +274,9 @@ Http.serve("8080", router)</code></pre>
   def route: PartialFunction[HttpRequest, Service[A, B]]
   def <mark>orElse</mark>(that: Endpoint[A, B]): Endpoint[A, B] = ???
 }</code></pre>
+<footer>
+The first abstraction that made it to Finch is an Endpoint, which is a composable router, where the routing logic is encoded by a partial function from HTTP request to service. It exposes the only method ‘orElse’ that takes two endpoints and composes them in terms of underling partial functions.
+</footer>
 	</div></section>
 
 
@@ -249,6 +291,13 @@ val tickets = Endpoint[HttpRequest, HttResponse] {
 }
 <div class="next">val router: Endpoint[HttpRequest, HttpResponse] = 
   users <mark>orElse</mark> tickets</div></code></pre>
+<footer>
+Here is how we use it. We group similar endpoints and then merge them into a single root endpoint. 
+--
+This abstraction is pretty straightforward since it completely reuses the built-in Finagle routing DSL. Although, it’s a pretty powerful thing given that there is an implicit conversion from Endpoint to Finagle service so we can do sort of nested endpoints here.
+--
+This thing survived till these days. While there is already a replacement for this in Finch called route combinators, some people still use this approach, since it’s just super simple and safe. The syntax is very intuitive even for Scala new-commers. Some time ago I got a feedback from a person who managed to write a REST API server with Finch with zero Scala experience just using the demo project as an example and this is really great.
+</footer>
 	</div></section>
 
 
@@ -261,6 +310,9 @@ val tickets = Endpoint[HttpRequest, HttResponse] {
   def <mark>flatMap</mark>[B](fn: A => RequestReader[B]): RequestReader[B]
   def <mark>map</mark>[B](fn: A => B): RequestReader[B]
 }</code></pre>
+<footer>
+Another early abstraction is a monadic request reader, which is a reader monad. It’s basically a function from HttpRequest to a Future of something. A reasonable question here is why it returns Future not Try. Well, in the very beginning we wanted to make it looks similar to regular Finagle services to unify the API. This works great, since Finagle Futures are quite lightweight given that we only deal with them in the satisfied state. So, the overhead of this Future is pretty low but it simplifies the other things a lot.
+</footer>
 	</div></section>
 
 
@@ -274,6 +326,11 @@ def OptionalParam(name: String): RequestReader[Option[String]] = ???
 def OptionalIntParam(name: String): RequestReader[Option[Int]] = ???
 ...
 </code></pre>
+<footer>
+The first API version was quite verbose. There was a pair of two readers: required and optional for every request part (like header, query-string param and so on) and every possible output type. 
+
+In total, there was like 40 readers in the API, but now it’s just ten. I will show you later how we’ve managed to reduce the API surface while maintain the functionality.
+</footer>
 	</div></section>
 
 
@@ -290,6 +347,11 @@ val user: RequestReader[User] = for {
 val response: Future[HttpResponse] = user(request).<mark>flatMap</mark> { u =>
   // TODO map user to a function User => Future[HttResponse]
 }</div></code></pre>
+<footer>
+That’s how we build a RequestReader of type User using the monadic API (like map and flatMap) via the for-comrehension. This request reader reads two query-string params from the HTTP request: required param “id” and optional param “name”.
+
+The basic usage pattern is exactly the same as we use regular Finagle services. Since the request reader returns future, we chain them with flatMap or using for-comprehension. So, it should be clear that if the request reader fails we will get the future exception in the response, just like from a failed service.
+</footer>
 	</div></section>
 
 
@@ -302,6 +364,9 @@ val response: Future[HttpResponse] = user(request).<mark>flatMap</mark> { u =>
       if (predicate) Future.Done
       else Future.exception(ValidationFailed(rule))
   }</code></pre>
+<footer>
+There also was a special case of a RequestReader called a Validation Rule that didn’t read anything useful but checked if the given boolean predicate is true. It returns an empty satisfied future if it’s true or throws a ValidationFiled exception otherwise. It looks pretty stupid, but it actually useful.
+</footer>
 	</div></section>
 
 
@@ -317,6 +382,9 @@ val adult: RequestReader[User] = for {
   _ <- ValidationRule("age should be greater than 21") { u.age > 21 }
 } yield u
 </code></pre>
+<footer>
+Here is how. We can use it in for-comprehension to compose it with other RequestReaders to validate their output values. There is no restriction here, we can chain any number of validation rules and they will be applied sequentially.
+</footer>
 	</div></section>
 
 
@@ -332,6 +400,9 @@ val adult: RequestReader[User] = for {
   <mark class="red">_ <- ValidationRule("age should be greater than 21") { u.age > 21 }</mark>
 } yield u
 </code></pre>
+<footer>
+But, bad news is, it’s not re-usable at all. You will have to write a new validation rule every time you need it, since the predicate is a value not a function, so we can’t really customize it. Usually, it’s not re-usable until it takes a function as an argument. Luckily, there is a better abstraction for this available in the current version. We will discover it later.
+</footer>
 	</div></section>
 
 
@@ -347,6 +418,11 @@ object Ok extends ResponseBuilder(Status.Ok)
 object Created extends ResponseBuilder(Status.Created)
 object NoContent extends ResponseBuilder(Status.NoContent)
 ...</div></code></pre>
+<footer>
+Remember how we built a JSON response in 3 lines of Java code? A ResponseBulder makes it much less verbose by providing a bunch of polymorphic methods that build an HTTP response depending on the argument type. It supports three response types: “text/plain”, “application/json” and a response with no content.
+--
+Usually, you don’t speak to a ResponseBulder directly but to a concrete implementation backed by a HTTP status code.
+</footer>
 	</div></section>
 
 
@@ -361,6 +437,11 @@ val noContent: HttpResponse = NoContent()
 <mark class="red">val created: HttpResponse = Created(Json.obj("id" -> jNumber(100)))</mark>
 </div>
 </code></pre>
+<footer>
+The usage looks pretty straightforward. All the concrete instances of the ResponseBuilder may be treated as regular functions. So far so good. But…
+--
+How can we support a new JSON library like Argonaut? Should we override an apply method within an Agronaut Json type? Actually, there is a better solution.
+</footer>
 	</div></section>
 
 
@@ -376,6 +457,9 @@ case class ResponseBuilder(status: Status) {
   def apply[A: <mark>EncodeResponse</mark>](body: A): HttpResponse = ???
 }
 </code></pre>
+<footer>
+A type-class based encoding. We have a type class EncodeResponse that knows everything about how to serialize the arbitrary type A into a string to send it in the response body. So, we can replace all the polymorphic methods in a ResponseBulder with just a single method for an arbitrary type A, for which there is an implicit instance of EncodeRespons available in the scope. So we will have all the required information to serialize it properly.
+</footer>
 	</div></section>
 
 
@@ -390,6 +474,9 @@ import io.finch.jackson._
 case class User(id: Int, name: String)
 val b: HttpResponse = Ok(User(100, "Ivan"))
 </code></pre>
+<footer>
+This is how we do JSON in Finch. For now, it supports two popular JSON libraries: Argonaut (which is preferred for pure Scala projects) and Jackson (targeted to a better Java compatibility). But, there is no limitation here: with this approach it takes just a few lines of code to implement a support for a new serialization library no matter if it’s JSON or XML or whatever.
+</footer>
 	</div></section>
 
 
@@ -403,6 +490,9 @@ val user: RequestReader[User] = RequiredBody.<mark>map</mark> { body =>
   // TODO parse User from String
 }
 </code></pre>
+<footer>
+There is also an opposite situation. We should be able to decode a content (usually JSON) of the request body. So, we need some sort of string-based body readers. And In order to convert string into a meaningful object (like User) we would have to manually map the request reader to a parsing function, which sounds ok, of course we can do better with ...
+</footer>
 	</div></section>
 
 
@@ -416,6 +506,11 @@ val user: RequestReader[User] = RequiredBody.<mark>map</mark> { body =>
 def RequiredBody[A: <mark>DecodeRequest</mark>]: RequestReader[A] = ???
 def OptionalBody[A: <mark>DecodeRequest</mark>]: RequestReader[Option[A]] = ???
 </code></pre>
+<footer>
+Type-class based request decoding. We have a type-class DecodeRequest that knows how to convert a string into an arbitrary type A. It returns Try so we can properly handle all the decoding errors.
+--
+We can pass an instance of the DecodeRequest type-class into body readers (like required body, optional body) so they would know how to decode an HTTP request body directly to a required type.
+</footer>
 	</div></section>
 
 
@@ -429,6 +524,9 @@ import io.finch.jackson._
 case class User(id: Int, name: String)
 val b: RequestReader[Option[User]] = OptionalBody[User]
 </code></pre>
+<footer>
+No surprise here. That’s how we do JSON decoding in Finch with two different libraries. And once again, no limitations here. You can decode anything you want as long as there in instance of DecodeRequest available for that type.
+</footer>
 	</div></section>
 
 
@@ -445,6 +543,11 @@ implicit val decodeBoolean: DecodeRequest[Boolean] =
   DecodeRequest { s => Try(s.toBoolean) }
 ...
 </code></pre>
+<footer>
+In that moment we realized that we can also apply this approach to not just HTTP bodies but other things, like query-string params and headers and so on. So we will be able to use the same API for everything, which is very nice. To do so, we did two simple things: 
+--
+First, provided implicit instances for all the target types we wanted to support by default.
+</footer>
 	</div></section>
 
 
@@ -460,6 +563,11 @@ val a = RequiredIntParam("a")
 val b = RequiredBooleanParam("b")
 val c = RequredBody[Json]
 </code></pre>
+<footer>
+Second, exposed a magic method “as” on the string-based readers so it can decode the underlying string value after reading.
+--
+This dramatically simplified the RequestReaders’ API, since we removed all the instance with hardcode output types.
+</footer>
 	</div></section>
 
 
@@ -476,6 +584,9 @@ val c = RequredBody[Json]
 <mark class="red">val c = RequredBody[Json]</mark>
 </mark>
 </code></pre>
+<footer>
+Here is how it looked like before type-class based decoding. 
+</footer>
 	</div></section>
 
 
@@ -491,6 +602,9 @@ val c = RequredBody[Json]
 <mark>val b = RequiredParam("b").as[Boolean]</mark>
 <mark>val c = RequredBody.as[Json]</mark>
 </code></pre>
+<footer>
+Here is how it looked after.
+</footer>
 	</div></section>
 
 
@@ -505,6 +619,9 @@ val c = RequredBody[Json]
 <mark>val b = param("b").as[Boolean]</mark>
 <mark>val c = body.as[Json]</mark>
 </code></pre>
+<footer>
+And here is how it looks today. We’ve moved towards short and lightweight names in the API, which is a pretty popular story for the functional libraries.
+</footer>
 	</div></section>
 
 
@@ -521,6 +638,13 @@ val interval: RequestReader[Interval] = for {
 } yield Interval(start, end)
 </div>
 </code></pre>
+<footer>
+The nice thing about type-class based decoding is that it’s very pluggable. You can easily extend the functionality of all the request readers to support new output type by providing a corresponding instance of the DecodeResponse type-class. In this example we define a new DecodeResponse instance for a JodaTime type DateTime in just a few lines of code.
+--
+So we can define a request reader that fetches a JodaTime interval from the two query string params start and end.
+--
+As we can see, type-classes fit very nicely into the problem of type-safe decoding and encoding, so we use them quite extensively in Finch.
+</footer>
 	</div></section>
 
 
@@ -534,6 +658,11 @@ val user: RequestReader[User] = for {
   city <- paramOption("city").<mark>withDefault</mark>("San Francisco")
 } yield User(age, name, city)
 </code></pre>
+<footer>
+Nowadays, the monadic API of the RequestReader looks like this. We’ve already discussed everything from here except for withDefault method, which is applicable for optional readers and provides the default value for the underlying option.
+--
+This looks good but the question here is do we always need a monad for that kind of things?
+</footer>
 	</div></section>
 
 
@@ -551,6 +680,9 @@ val user: RequestReader[User] = for {
 			font-size:60px;
 			}
 		</style>
+<footer>
+No, we don’t. While the API powered by the language support looks nice, we lack the ability to properly handle the request readers errors (like missing param or unexpected param type). The nature of Monads is fail-fast, so the RequestReader composed with the Monadic API will return the only first appeared error, which is nightmare for the front-end developers talking to our REST API.
+</footer>
 	</div></section>
 
 
@@ -563,6 +695,9 @@ trait RequestReader[A] {
   def <mark>~</mark>[B](that: RequestReader[B]): RequestReader[<mark>A ~ B</mark>] = ???
 }
 </code></pre>
+<footer>
+Good news. We can collect the errors using the Applicative API available in Finch. It consists of both the composite type that wraps two values and the combinator ~ that takes two request readers and merges them into a single RequestReaders of a composite type. So the resulting request reader is basically reading two values not sequentially but in parallel.
+</footer>
 	</div></section>
 
 
@@ -580,6 +715,9 @@ val b: RequestReader[User] = a.map {
   case age ~ name ~ city => User(age, name, city)
 }
 </code></pre>
+<footer>
+The API looks pretty nice due to Scala language support of infix types.
+</footer>
 	</div></section>
 
 
@@ -596,6 +734,9 @@ val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
   <mark class="red">case age ~ name ~ city => User(age, name, city)</mark>
 <mark class="red">}</mark>
 </code></pre>
+<footer>
+But this pattern matching here looks ugly. We have to write this boilerplate code every time, which is very annoying. Can we do better here? Well, what if we could rewrite it like this.
+</footer>
 	</div></section>
 
 
@@ -611,6 +752,9 @@ val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
 
 <mark>val b: RequestReader[User] = a ~> User</mark>
 </code></pre>
+<footer>
+We replaced map with an arrow that makes it possible to omit pattern matching here. Wondering how it’s possible? It’s pretty simple.
+</footer>
 	</div></section>
 
 
@@ -618,6 +762,9 @@ val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
 
 	<section class="slide cover h"><div>
 		<img src="pictures/magic.gif" alt="">
+<footer>
+Magic!
+</footer>
 	</div></section>
 
 
@@ -632,6 +779,11 @@ val a: RequestReader[<mark>Int ~ String ~ String</mark>] =
       case a ~ b ~ .. ~ z => f(a, b, ..., z)
     }
 }</code></pre>
+<footer>
+Well, not really *that* simple. but sill. An arrow combinator allows us to treat a function of type A ~ B and so on ~ Z to whatever as a regular Scala function.
+--
+What we do here is define an implicit class like Arrow26 for every possible composite type. In this class we expose a method arrow implemented in terms of map that does pattern matching for us. This works great, but we’re now in the middle of removing all this boilerplate code even rom Finch. I would say there is a law of conservation of the boilerplate code that says the total amount of the boilerplate code in your stack remains constant: either your write it or library authors write it for you. So, we can only move the boiler plate code deep down to the libraries like Shapeless or cats. That’s what we’re actually trying do right now.
+</footer>
 	</div></section>
 
 
@@ -649,6 +801,11 @@ trait RequestReader[A] {
   def <mark>should</mark>(rule: VlidationRule[A]): RequestReader[A] = ???
   def <mark>shouldNot</mark>(rule: VlidationRule[A]): RequestReader[A] = ???
 }</code></pre>
+<footer>
+The ValidationRule has also been revisited in the recent releases. We replaced that ugly version of a ValidationRule backed by a RequestReader[Unit] with this fancy abstraction. It’s basically a boolean predicate that is composable in terms of logical or and logical and.
+--
+There are also two new methods “should” and “shouldNot” on the RequestReader that allow to compose it within a ValidaitonRule.
+</footer>
 	</div></section>
 
 
@@ -667,6 +824,13 @@ def beShorterThan(n: Int): ValidationRule[String]
   param("b") <mark>should</mark>(beLongerThan(5) <mark>and</mark> beShorterThan(25))
 </div>
 		</code></pre>
+<footer>
+Finch provides a bunch of reusable validation rules for both numbers and strings. 
+--
+As you probably noticed the RequestReader API now looks like a tiny DSL for request processing, which fits pretty well into the concept of functional programming and design of purely functional libraries.
+--
+Here we define two request readers that read a Future of NotValid exception in case of unsuccessful validation and integer and string values otherwise.
+</footer>
 	</div></section>
 
 
@@ -683,6 +847,13 @@ trait Router[+A] {
   def andThen[B](that: Router[B]): Router[A / B] // or <mark>/</mark>
   def orElse[B >: A](that: Router[B]): Router[B] // or <mark>|</mark>
 }</code></pre>
+<footer>
+Speaking of the domain specific languages. There is route combinators API available in Finch nowadays. The concept of this DSL is similar to Scala parser combinators or scodec. Given a plenty of predefined primitive routers that know how to handle only a single route part, you compose them with special functions (called combinators) to construct a complex things that actually solve your problem. 
+--
+Routers always extract something from the given route. It’s basically a function from an abstract route to an option of both the rest of the route and an extracted value.
+--
+The API is pretty simple. The only interesting method here is andThen that sequentially composes two routers and returns a router of a composite type: so the new router is basically extracts two values.
+</footer>
 	</div></section>
 
 
@@ -696,6 +867,9 @@ object * extends Router[Nothing] { ... }
 object int extends Router[Int] { ... }
 object string extends Router[String] { ... }
 </code></pre>
+<footer>
+All the built-in routers might be divided into two groups: matching routers that extracts nothing and extracting routers that extracts something. For example, Router Get matches the request method, a special router star that always matches the given route and finally two extracting routers “int” and “string” that extract integer and string values correspondingly.
+</footer>
 	</div></section>
 
 
@@ -711,6 +885,11 @@ val b: Router[HttpResponse] =
   Get / "blackhole" /> NotFound("There is no blackhole on this server.")
 </div>
 </code></pre>
+<footer>
+The route combinators API is very intuitive and lightweight. I don’t think I have to comment this. But there is one interesting restriction I want to talk about.
+
+In this example we compose two routers together with the “orElse” combinators. So, if the first router fails, the second will be used. This looks powerful, but it’s not. It only works if the types of two routers are the same, which doesn’t really look useful in a real life, since we usually don’t serve only users or tickets on the same API server. We serve both.
+</footer>
 	</div></section>
 
 
@@ -725,6 +904,15 @@ val api: Endpoint[HttpRequest, HttpResponse] =
   Get / "tickets" /> Service.mk { req: HttpRequest => ... }
 </div>
 </code></pre>
+<footer>
+In order to overcome this, we force users to unify their routers to a single output type - HttpService, so they can safely compose them. 
+--
+So, every router extracts an HTTP service that actually does a job. This works good, and more importantly, fits well into the concept of how Finagle does it. 
+--
+In Finagle HTTP you usually deal with raw HTTP types directly with Services from HTTP Request to HTTP response. No bid deal, but these types mean nothing in your domain. If I say I want a service that returns a user by given id, I’m thinking about service (or function) from Int to User not about function HTTP Request to HTTP Response. We lack all the type information behind these useless HTTP types, which is terrible because in Scala types actually matter. I’m pretty sure you would agree with me that types help us to better understand what’s going on in the code. Just compare those two functions: Int to User and HttpRequest to HttpResponse. It’s clear that the first function maps an integer value to some User. But what does the second function do? Who knows, I bet it’s rebooting your server.
+--
+That’s what we’re working on right now. We want to make Finch more type-safe by getting rid of useless HTTP types so you can finally see an actual types behind them.
+</footer>
 	</div></section>
 
 
@@ -737,6 +925,15 @@ val api: Endpoint[HttpRequest, HttpResponse] =
 			<li class="next">Compose Routers and RequestReaders <br />(e.g. <code>Get / "users" ? param("id")</code>)</li>
 			<li class="next">Merge functionality of RequestReaders and Routers into a single abstraction</li>
 		</ol>
+<footer>
+This should be possible with heterogenous routers backed by Shapeless. I’m sure Travis will give you some details on this direction, in the next talk.
+--
+The idea of heterogenous router is basically to allow users serve any types with Finch (not just HTTP types). Although, it’s still should be possible to drop down to the raw HTTP types if needed.
+--
+Also, we want to allow users to compose RequsetReaders and Routers together, so they can use this unified DSL that looks more like URL but not Scala code, which is very nice.
+--
+And finally, we will probably merge the functionality of both RequestReaders and Routes so we can have just a single abstractions for everything. There is no ticket for this yet. It’s just an idea of top of my head. But it looks pretty solid to me. I believe that it will be a killer feature of Finch.
+</footer>
 	</div></section>
 
 
@@ -746,12 +943,24 @@ val api: Endpoint[HttpRequest, HttpResponse] =
 		</blockquote>
 		</div>
 		<script async src="http://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<footer>
+The bottom line is, Finch is probably the right tool for you if you wish to have highly composable Functional Programming primitives aligned with Finagle scalability and performance. 
+--
+And I really like this tweet from Travis. It somehow explains where is Finch right now. It lies between this awesome Scala libraries and working really hard to combine them in a nice way. 
+</footer>
 	</div></section>
 
 
 
 	<section class="slide shout"><div>
 		<h2><a href="https://github.com/finagle/finch">https://github.com/finagle/finch</a></h2>
+<footer>
+Here is the link to the GitHub page. Feel free to join, file an issue or send a PR.
+--
+The last think I wanted to say. Just a quick remainder, I’m nether an expert in functional programming nor in REST APIs. I just made a yak-shaving tool that I missed and then other people found it useful for their problems and joined the project. So, we started working on Finch together trying to build something nice and workable. As for for today, at least 8 Finch contributors made the real difference in the project and contributed the mission critical parts of the API (for example). So, if you want to make such difference, try it, leave a feedback and we will work together to address it before 1.0. 
+--
+Thank you! That’s all for today. I’m ready to answer your questions.
+</footer>
 	</div></section>
 
 	<!--
