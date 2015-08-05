@@ -1,0 +1,558 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>Finch 101</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=792, user-scalable=no">
+	<link rel="stylesheet" href="shower/themes/bright/styles/screen.css">
+	<link rel="stylesheet" href="highlight/styles/default.css">
+	<style>
+		code {
+			font-size: 18px;
+		}
+		.slide.shout h2 {
+			font-size: 60px;
+		}
+		.slide pre mark.red {
+			background: #FFA1A1;
+		}
+		.coding-time h2 {
+			font-family: "Open Sans", sans-serif;
+			color: #FFF;
+			font-size: 46px;
+			font-weight: bold;
+		}
+		</style>
+	</style>
+</head>
+<body class="full">
+
+	<section class="slide cover" id="Cover"><div>
+		<div style="margin-top: 16%;">
+			<h2><strong>Finch<strong> 101:</h2>
+			<p>HTTP APIs with Finagle, TwitterServer and Finch</p>
+		</div>
+		<p><a href="https://twitter.com/vkostyukov">@vkostyukov</a></p>
+		<style>
+			#Cover.slide {
+				background: #FFF;
+			}
+			#Cover h2 {
+				font-family: "Open Sans", sans-serif;
+				margin:20px 0 0;
+				color:#444;
+				text-align:center;
+				font-size:82px;
+				}
+			#Cover p {
+				margin:12px 0 0;
+				text-align:center;
+				color:#444;
+				font-size:24px;
+				}
+			#Cover p a {
+				color:#4099FF;
+				font-size:28px;
+				}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>$ whoami </h2>
+		<ul>
+			<li>2010-2014: Compiler Engineer at Intel (ART/DalvikVM <a href="https://android-review.googlesource.com/#/q/Vladimir+Kostyukov">contributor</a>)</li>
+			<li>Since 2013: <a href="https://github.com/vkostyukov/scalacaster">Scalacaster</a> maintainer</a>
+			<li>Since 2014: <a href="https://github.com/finagle/finch">Finch</a> and <a href="https://github.com/finagle/finagle-oauth2">Finagle-OAuth2</a> maintainer</li> 
+			<li>Since 2014: Scala Developer at Twitter (<a href="https://github.com/twitter/finagle">Finagle</a> team)</li>
+			<li>Since 2014: "Sponsor" of the <a href="https://github.com/vkostyukov/kotlin-sublime-package/pull/2">syntax highlighting for Kotlin</a> on Github</li>
+		</ul>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Agenda</h2>
+		<ul>
+			<li><strong>Finagle HTTP</strong></li>
+			"Hello, World", Clients/Servers/Services, Stack API
+			<li><strong>Finch</strong></li>
+			"Hello, World", Routers, RequestReaders, Shapeless, <a href="https://github.com/travisbrown/jfc">jfc</a>, <a href="http://www.todobackend.com/">TodoBackend</a>
+			<li><strong>TwitterServer</strong></li>
+			Metrics, Flags, HTTP Admin Interface
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide" id="Finagle"><div>
+		<img src="pictures/finagle-logo.png" alt="" height="500px" class="place c">
+		<style>
+			#Finagle img {
+				margin-top: -40px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finagle: Status</h2>
+		<ul>
+			<li>Around since <a href="https://twitter.com/finagle/status/567885703180259328">since Aug 2010</a></li>
+			<li><code>finagle-core</code> - 40k LOC; <code>finagle-httpx</code> - 10k LOC</li>
+			<li><a href="https://github.com/twitter/finagle/graphs/contributors">140 contributors</a> so far</li>
+			<li>15+ protocols implemented, including <a href="https://github.com/twitter/finagle/tree/master/finagle-httpx">HTTP</a>, <a href="https://github.com/twitter/finagle/tree/master/finagle-thrift">Thrift</a>, <a href="https://github.com/twitter/finagle/tree/master/finagle-memcachedx">Memcached</a>, <a href="https://github.com/twitter/finagle/tree/develop/finagle-mysql">MySql</a></li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finagle: Who is using?</h2>
+		<ul>
+			<li>Foursquare</li>
+			<li>PagerDuty</li>
+			<li>Pinterest</li>
+			<li>Rdio</li>
+			<li>SoundCloud</li>
+			<li>Strava</li>
+			<li>... and many <a href="https://github.com/twitter/finagle/blob/master/ADOPTERS.md">more</a></li>
+		</ul>
+	</div></section>
+
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finagle: @Twitter</h2>
+		<ul>
+			<li>Core System Libraries (8 engineers): A dedicated <a href="https://twitter.com/vkostyukov/status/613840446725357569">team</a> that maintains <a href="https://github.com/twitter/finagle">Finagle</a>, <a href="https://github.com/twitter/util">Util</a>, <a href="https://github.com/twitter/twitter-server">TwitterServer</a> and <a href="https://github.com/twitter/scrooge">Scrooge</a></li>
+			<li>Internal <a href="https://groups.google.com/forum/#!forum/finaglers">@finaglers</a></li>
+			<li>On-call rotations</li>
+			<li><a href="https://twitter.com/monorepi">Monorepo</a> and monobuild: no milestones</li>
+		</ul>
+	</div></section>
+
+
+
+
+
+
+	<section class="slide"><div>
+		<div align="center" style="margin-top: -65px;">
+          <blockquote class="twitter-tweet" lang="en"><p lang="en" dir="ltr">here I updated the XKCD comic for you <a href="http://t.co/pwPBIghTV3">pic.twitter.com/pwPBIghTV3</a></p>&mdash; monorepi (@monorepi) <a href="https://twitter.com/monorepi/status/542081644954259457">December 8, 2014</a></blockquote>
+          <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		</div>
+	</div></section>
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>finagle hello world</mark></h2>
+	</div></section>
+
+
+
+
+     <section class="slide"><div>
+		<h2>Finagle and Scala</h2>
+		<figure>
+			<blockquote>
+				<p>
+				Scala provides many ways of creating composable complexity. Finagle leverages pretty much every feature of Scala (and there are many) to maximize this composability in a sane way ...
+				</p>
+			</blockquote>
+			<figcaption>From the <a href="https://news.ycombinator.com/item?id=9035621">HN discussion</a> on rewriting Finagle in Go</figcaption>
+		</figure>
+	</div></section>
+
+
+
+
+
+	<section class="slide" id="Service"><div>
+		<h2>Your Server as <a href="http://monkey.org/~marius/funsrv.pdf">a Function</a></h2>
+<pre class="place c"><code class="scala">trait Service[<mark>-Req</mark>, <mark>+Req</mark>] extends (Req => Future[Rep])
+</code></pre>
+		<style>
+			#Service code {
+				font-size: 22px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+     <section class="slide"><div>
+		<h2>Servers, Clients, Services, oh my!</h2>
+		<ul>
+			<li>Services are symmetric</li>
+			<li>Clients <i>produce</i> (i.e., <code>Httpx.client.newService</code>) Services</li>
+			<li>Servers <i>serve</i> (i.e., <code>Httpx.server.serve</code>) Services</li>
+			<li>Conventional API pattern: <code>&lt;Protocol&gt;.client</code> and <code>&lt;Protocol&gt;.server</code></li>
+		</ul>
+	</div></section>
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>finagle http proxy</mark></h2>
+	</div></section>
+
+
+
+
+     <section class="slide"><div>
+		<h2>Stack API</h2>
+		<ul>
+			<li>A modern replacement for <code>ClientBuilder</code> and <code>ServerBuilder</code></li>
+			<li>Servers and Clients are backed by a <code>Stack</code> of <i>modules</i> (ServiceFactories)</li>
+			<li>Allows the user to <mark><i>configure</i></mark> or <mark><i>transform</i></mark> ("an expert-level API") the underlying <code>Stack</code></li>
+		</ul>
+	</div></section>
+
+
+
+
+     <section class="slide"><div>
+		<h2>Stack.Params</h2>
+<pre><code class="scala">case class ConnectionsLimit(limit: Int)
+object ConnectionsLimit {
+  implicit val param: Stack.Param[ConnectionsLimit] = 
+    Stack.Param(ConnectionsLimit(Int.MaxValue))
+}
+
+Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
+</code></pre>
+	</div></section>
+
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>finagle stack params</mark></h2>
+	</div></section>
+
+
+
+
+
+	<section class="slide"><div>
+		<img src="pictures/finch-logo.png" alt="" width="800px" class="place c">
+	</div></section>
+
+
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>finch hello world</mark></h2>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finch: Why?</h2>
+		<ul>
+			<li>A Scala idiomatic (functional) way of building Finagle HTTP services</li>
+			<li>Built on top of all the modern <i>best practices</i>:</li> 
+				<ul>
+					<li><a href="https://github.com/milessabin/shapeless">Shapeless</a>' <code>HList</code> instead of custom composite types</li>
+					<li><a href="https://github.com/argonaut-io/argonaut">Argonaut</a> and <a href="https://github.com/travisbrown/jfc">jfc</a> for JSON</li>
+					<li><a href="https://github.com/non/cats">Cats</a> for type-classes (<a href="https://github.com/finagle/finch/issues/363">in progress</a>)</li>
+				</ul>
+			<li>It's <a href="https://github.com/finagle/finch/blob/master/docs/index.md">well-documented</a></li>
+			<li>It's <a href="https://twitter.com/vkostyukov/status/591437838962548736">hot!</a></li>
+		</ul>
+	</div></section>
+
+
+
+
+		<section class="slide"><div>
+		<h2>Finch: Status</h2>
+		<ul>
+			<li>6+ companies</a> are using <a href="https://github.com/finagle/finch#adopters">Finch in production</a></li>
+			<li>~30 <a href="https://github.com/finagle/finch/graphs/contributors">contributors</a></li>
+			<li>~100 users on <a href="https://gitter.im/finagle/finch">the Gitter channel</a></li>
+			<li>An <a href="https://twitter.com/josdirksen/status/615582027761516544">upcoming Scala book</a> featuring Finch</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finch <u>affects</u> the Scala community!</h2>
+		<div align="center">
+			<blockquote class="twitter-tweet" data-cards="hidden" lang="en"><p lang="en" dir="ltr">I&#39;m glad to see that other OSS <a href="https://twitter.com/hashtag/Scala?src=hash">#Scala</a> projects benefit from Finch. Today&#39;s examples: <a href="https://t.co/9Ipg5d8QN0">https://t.co/9Ipg5d8QN0</a> and <a href="https://t.co/vej6kw2Fbg">https://t.co/vej6kw2Fbg</a></p>&mdash; Vladimir Kostyukov (@vkostyukov) <a href="https://twitter.com/vkostyukov/status/610957464746504192">June 16, 2015</a></blockquote>
+			<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		</div>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finch: @Twitter</h2>
+		<ul>
+			<li>Finch is an <i>OSS</i>, a community-driven project that is happened to be maintained by <a href="https://github.com/finagle/finch/blob/master/NOTICE#L2">two Twitter engineers</a></li>
+			<li>Finch is neither used nor developed at Twitter</li>
+			<li>???</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2><a href="https://groups.google.com/forum/#!topic/finaglers/xSXn8_91bho">Finch vs Finatra</a></h2>
+		<ul>
+			<li><a href="https://github.com/twitter/finatra">Finatra</a> is a <i>default</i> web-framework at Twitter</li>
+			<li>???</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>finch greetings</mark></h2>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>RequestReaders</h2>
+<pre><code class="scala">trait RequestReader[A] extends (Request => Future[A])
+
+def param(name: String): RequestReader[String] = ???
+def paramOption(name: String): RequesReader[Option[String]] = ???
+val body: RequestReader[String] = ???
+val bodyOption: RequestReader[Option[String]] = ???
+...
+</code></pre>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>RequestReaders</h2>
+<pre><code class="scala">case class User(id: Int, name: Option[String])
+
+val user1: RequestReader[User] = 
+  (param("id").as[Int] :: paramOption("name")).<mark>as[User]</mark>
+
+val user2: RequestReader[User] = 
+  RequestReader.<mark>derive[User]</mark>.fromParams
+</code></pre>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Routers</h2>
+<pre><code class="scala">trait Router[A] extends (Input => Option[(Input, <mark>() => Future[A]</mark>)])
+
+def get[A](r: Router[A]): Router[A] = ???
+def post[A](r: Router[A]): Router[A] = ???
+...
+val int: Router[Int] = ???
+val string: Router[String] = ???
+...
+</code></pre>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Routers</h2>
+<pre><code class="scala">val greet1: Router[String :: Option[String] :: HNil] = 
+  get("hello" / string ? paramOption("title"))
+
+val greet2: Router[String] = 
+  greet1.<mark>map</mark> { (name: String, title: Option[String]) =>
+    s"Hello, ${title.getOrElse("")} $name"
+  }
+</code></pre>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Routers</h2>
+<pre><code class="scala">trait Router[A] {
+  ...
+  def <mark>/</mark>[B](that: Router[B]): Router[A :: B :: HNil]
+  def <mark>:+:</mark>[B](that: Router[B]): Router[A :+: B :+: CNil]
+  ...
+}
+</code></pre>
+
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Routers</h2>
+<pre><code class="scala">val r1: Router[String] = ???
+val r2: Router[Int] = ???
+val r3: Router[String :+: Int :+: CNil] = r1 <mark>:+:</mark> r2
+
+val s: Service[Request, Response] = r3.<mark>toService</mark>
+</code></pre>
+
+	</div></section>
+
+
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>coproduct routers</mark></h2>
+	</div></section>
+
+
+
+
+
+	<section class="slide"><div>
+		<h2>JSON support (via type classes)</h2>
+<pre><code class="scala">trait EncodeResponse[A] {
+  <mark>def apply(rep: A): Buf</mark>
+  def contentType: String
+  def charset: Option[String] = Some("utf-8")
+}
+
+trait DecodeRequest[A] {
+  <mark>def apply(req: String): Try[A]</mark>
+}</code></pre>
+	</div></section>
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>finch with jfc</mark></h2>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2><a href="http://www.todobackend.com/">TodoBackend.com</a></h2>
+		<ul>
+			<li>Endpoints</li>
+			<ul>
+				<li><code>GET /todos</code></li>
+				<li><code>POST /todos</code></li>
+				<li><code>PATCH /todos/:id</code></li>
+			</ul>
+			<li>Model</li>
+<pre><code class="scala">case class Todo(
+  id: String, title: String, completed: Boolean, order: Int
+)</code></pre>
+		</ul>
+	</div></section>
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>todobackend</mark></h2>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2 class="place c">TwitterServer</h2>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>TwitterServer: What is inside?</h2>
+		<ul>
+			<li>HTTP Admin interface</li>
+			<li>Metrics</li>
+			<li>Flags</li>
+			<li>Lifecycle Management</li>
+			<li>... and <a href="http://twitter.github.io/twitter-server/Features.html">more</a></a>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide shout"><div>
+		<h2>Demo: <mark>twitterserver</mark></h2>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>How to contribute to Finch?</h2>
+		<ul>
+			<li>Try it and <a href="https://gitter.im/finagle/finch">leave a feedback</a></li>
+			<li>Try it and <a href="https://github.com/finagle/finch">submit a PR</a></li>
+			<li>Try it!</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Want to join the CSL team?</h2>
+		<div align="center" style="margin-top: -20px;">
+			<blockquote class="twitter-tweet" lang="en"><p lang="en" dir="ltr">Want to build libraries that hundreds of millions of people rely on every day? Here&#39;s your chance: <a href="https://t.co/BOV3Pdm6f8">https://t.co/BOV3Pdm6f8</a> /cc <a href="https://twitter.com/JoinTheFlock">@JoinTheFlock</a></p>&mdash; Finagle (@finagle) <a href="https://twitter.com/finagle/status/616696300734578688">July 2, 2015</a></blockquote>
+			<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		</div>
+	</div></section>
+
+
+
+
+	<section class="slide shout" id="Bye"><div>
+		<h2><a href="https://github.com/finagle/finch">https://github.com/finagle/finch</a></h2>
+		<style>
+		  #Bye h2 {
+		   left: 80px;
+		  }
+		</style>
+	</div></section>
+
+
+
+
+	<!--
+		To hide progress bar from entire presentation
+		just remove “progress” element.
+		-->
+	<div class="progress"><div></div></div>
+	<script src="shower/shower.min.js"></script>
+	<script src="highlight/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61641022-1', 'auto');
+ga('send', 'pageview');
+	</script>
+	<!-- Copyright © 2014 Yours Truly, Famous Inc. -->
+	<!-- Photos by John Carey, fiftyfootshadows.net -->
+</body>
+</html>
