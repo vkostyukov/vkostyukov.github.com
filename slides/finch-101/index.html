@@ -395,6 +395,7 @@ val greet2: Router[String] =
 <pre><code class="scala">trait Router[A] {
   ...
   def <mark>/</mark>[B](that: Router[B]): Router[A :: B :: HNil]
+  def <mark>?</mark>[B](that: RequestReader[B]): Router[A :: B :: HNil]
   def <mark>:+:</mark>[B](that: Router[B]): Router[A :+: B :+: CNil]
   ...
 }
@@ -522,11 +523,38 @@ trait DecodeRequest[A] {
 
 
 
+	<section class="slide shout" id="Bye0"><div>
+		<h2><a href="http://vkostyukov.ru/slides/finch-101">http://vkostyukov.ru/slides/finch-101</a></h2>
+		<style>
+		  #Bye0 h2 {
+		   left: 98px;
+		   font-size: 50px;
+		  }
+		</style>
+	</div></section>
 
-	<section class="slide shout" id="Bye"><div>
+
+
+
+
+	<section class="slide shout" id="Bye1"><div>
+		<h2><a href="https://github.com/vkostyukov/finch-101">https://github.com/vkostyukov/finch-101</a></h2>
+		<style>
+		  #Bye1 h2 {
+		   left: 90px;
+		   font-size: 46px;
+		  }
+		</style>
+	</div></section>
+
+
+
+
+
+	<section class="slide shout" id="Bye2"><div>
 		<h2><a href="https://github.com/finagle/finch">https://github.com/finagle/finch</a></h2>
 		<style>
-		  #Bye h2 {
+		  #Bye2 h2 {
 		   left: 80px;
 		  }
 		</style>
