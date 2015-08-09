@@ -66,7 +66,6 @@
 			<li>Since 2013: <a href="https://github.com/vkostyukov/scalacaster">Scalacaster</a> maintainer</a>
 			<li>Since 2014: <a href="https://github.com/finagle/finch">Finch</a> and <a href="https://github.com/finagle/finagle-oauth2">Finagle-OAuth2</a> maintainer</li> 
 			<li>Since 2014: Scala Developer at Twitter (<a href="https://github.com/twitter/finagle">Finagle</a> team)</li>
-			<li>Since 2014: "Sponsor" of the <a href="https://github.com/vkostyukov/kotlin-sublime-package/pull/2">syntax highlighting for Kotlin</a> on Github</li>
 		</ul>
 	</div></section>
 
@@ -78,7 +77,7 @@
 			<li><strong>Finagle HTTP</strong></li>
 			"Hello, World", Clients/Servers/Services, Stack API
 			<li><strong>Finch</strong></li>
-			"Hello, World", Routers, RequestReaders, Shapeless, <a href="https://github.com/travisbrown/jfc">jfc</a>, <a href="http://www.todobackend.com/">TodoBackend</a>
+			"Hello, World", Routers, RequestReaders, Shapeless, <a href="https://github.com/travisbrown/circe">circe</a>, <a href="http://www.todobackend.com/">TodoBackend</a>
 			<li><strong>TwitterServer</strong></li>
 			Metrics, Flags, HTTP Admin Interface
 		</ul>
@@ -154,25 +153,8 @@
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>finagle hello world</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finagle/HelloWorld.scala"><mark>finagle hello world</mark></a></h2>
 	</div></section>
-
-
-
-
-     <section class="slide"><div>
-		<h2>Finagle and Scala</h2>
-		<figure>
-			<blockquote>
-				<p>
-				Scala provides many ways of creating composable complexity. Finagle leverages pretty much every feature of Scala (and there are many) to maximize this composability in a sane way ...
-				</p>
-			</blockquote>
-			<figcaption>From the <a href="https://news.ycombinator.com/item?id=9035621">HN discussion</a> on rewriting Finagle in Go</figcaption>
-		</figure>
-	</div></section>
-
-
 
 
 
@@ -203,7 +185,7 @@
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>finagle http proxy</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finagle/Proxy.scala"><mark>finagle http proxy</mark></a></h2>
 	</div></section>
 
 
@@ -226,7 +208,7 @@
 <pre><code class="scala">case class ConnectionsLimit(limit: Int)
 object ConnectionsLimit {
   implicit val param: Stack.Param[ConnectionsLimit] = 
-    Stack.Param(ConnectionsLimit(Int.MaxValue))
+    Stack.Param(ConnectionsLimit(<mark>Int.MaxValue</mark>))
 }
 
 Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
@@ -237,7 +219,7 @@ Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>finagle stack params</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finagle/StackParams.scala"><mark>finagle stack params</mark></a></h2>
 	</div></section>
 
 
@@ -253,7 +235,7 @@ Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>finch hello world</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finch/HelloWorld.scala"><mark>finch hello world</mark></a></h2>
 	</div></section>
 
 
@@ -262,15 +244,14 @@ Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
 	<section class="slide"><div>
 		<h2>Finch: Why?</h2>
 		<ul>
-			<li>A Scala idiomatic (functional) way of building Finagle HTTP services</li>
+			<li>A Scala idiomatic (functional) way of building HTTP services</li>
 			<li>Built on top of all the modern <i>best practices</i>:</li> 
 				<ul>
 					<li><a href="https://github.com/milessabin/shapeless">Shapeless</a>' <code>HList</code> instead of custom composite types</li>
-					<li><a href="https://github.com/argonaut-io/argonaut">Argonaut</a> and <a href="https://github.com/travisbrown/jfc">jfc</a> for JSON</li>
+					<li><a href="https://github.com/argonaut-io/argonaut">Argonaut</a> and <a href="https://github.com/travisbrown/circe">circe</a> for JSON</li>
 					<li><a href="https://github.com/non/cats">Cats</a> for type-classes (<a href="https://github.com/finagle/finch/issues/363">in progress</a>)</li>
 				</ul>
 			<li>It's <a href="https://github.com/finagle/finch/blob/master/docs/index.md">well-documented</a></li>
-			<li>It's <a href="https://twitter.com/vkostyukov/status/591437838962548736">hot!</a></li>
 		</ul>
 	</div></section>
 
@@ -306,18 +287,6 @@ Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
 		<ul>
 			<li>Finch is an <i>OSS</i>, a community-driven project that is happened to be maintained by <a href="https://github.com/finagle/finch/blob/master/NOTICE#L2">two Twitter engineers</a></li>
 			<li>Finch is neither used nor developed at Twitter</li>
-			<li>???</li>
-		</ul>
-	</div></section>
-
-
-
-
-	<section class="slide"><div>
-		<h2><a href="https://groups.google.com/forum/#!topic/finaglers/xSXn8_91bho">Finch vs Finatra</a></h2>
-		<ul>
-			<li><a href="https://github.com/twitter/finatra">Finatra</a> is a <i>default</i> web-framework at Twitter</li>
-			<li>???</li>
 		</ul>
 	</div></section>
 
@@ -325,7 +294,7 @@ Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>finch greetings</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finch/Greetings.scala"><mark>finch greetings</mark></a></h2>
 	</div></section>
 
 
@@ -350,7 +319,7 @@ val bodyOption: RequestReader[Option[String]] = ???
 <pre><code class="scala">case class User(id: Int, name: Option[String])
 
 val user1: RequestReader[User] = 
-  (param("id").as[Int] :: paramOption("name")).<mark>as[User]</mark>
+  (param("id").as[Int] <mark>::</mark> paramOption("name")).<mark>as[User]</mark>
 
 val user2: RequestReader[User] = 
   RequestReader.<mark>derive[User]</mark>.fromParams
@@ -377,11 +346,12 @@ val string: Router[String] = ???
 
 	<section class="slide"><div>
 		<h2>Routers</h2>
-<pre><code class="scala">val greet1: Router[String :: Option[String] :: HNil] = 
+<pre><code class="scala">// GET /hello/:name?title=Mr.
+val greet1: Router[String :: Option[String] :: HNil] = 
   get("hello" / string ? paramOption("title"))
 
 val greet2: Router[String] = 
-  greet1.<mark>map</mark> { (name: String, title: Option[String]) =>
+  greet1 { (name: String, title: Option[String]) =>
     s"Hello, ${title.getOrElse("")} $name"
   }
 </code></pre>
@@ -395,8 +365,8 @@ val greet2: Router[String] =
 <pre><code class="scala">trait Router[A] {
   ...
   def <mark>/</mark>[B](that: Router[B]): Router[A :: B :: HNil]
-  def <mark>?</mark>[B](that: RequestReader[B]): Router[A :: B :: HNil]
   def <mark>:+:</mark>[B](that: Router[B]): Router[A :+: B :+: CNil]
+  def <mark>?</mark>[B](that: RequestReader[B]): Router[A :: B :: HNil]
   ...
 }
 </code></pre>
@@ -445,7 +415,7 @@ trait DecodeRequest[A] {
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>finch with jfc</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finch/Time.scala"><mark>finch with circe</mark></a></h2>
 	</div></section>
 
 
@@ -454,11 +424,9 @@ trait DecodeRequest[A] {
 		<h2><a href="http://www.todobackend.com/">TodoBackend.com</a></h2>
 		<ul>
 			<li>Endpoints</li>
-			<ul>
-				<li><code>GET /todos</code></li>
-				<li><code>POST /todos</code></li>
-				<li><code>PATCH /todos/:id</code></li>
-			</ul>
+ <code>GET /todos</code>; <code>POST /todos</code>; <code>PATCH /todos/:id</code>
+ <br />
+ <code>DELETE /todos/:id</code>; <code>DELETE /todos</code>
 			<li>Model</li>
 <pre><code class="scala">case class Todo(
   id: String, title: String, completed: Boolean, order: Int
@@ -469,7 +437,7 @@ trait DecodeRequest[A] {
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>todobackend</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finch/Todo.scala"><mark>todobackend</mark></a></h2>
 	</div></section>
 
 
@@ -496,7 +464,7 @@ trait DecodeRequest[A] {
 
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>twitterserver</mark></h2>
+		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/twitterserver/HelloWorld.scala"><mark>twitterserver</mark></a></h2>
 	</div></section>
 
 
