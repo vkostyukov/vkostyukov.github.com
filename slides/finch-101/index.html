@@ -287,8 +287,10 @@
 
 	<section class="slide"><div>
 		<h2>RequestReaders</h2>
-<pre><code class="scala">trait RequestReader[A] extends (Request => Future[A])
-
+<pre><code class="scala">trait RequestReader[A] extends (Request => Future[A]) {
+  def <mark>::</mark>[B](that: RequestReader[B]): RequestReader[A :: B :: HNil]
+}
+...
 def param(name: String): RequestReader[String] = ???
 def paramOption(name: String): RequesReader[Option[String]] = ???
 val body: RequestReader[String] = ???
@@ -300,25 +302,12 @@ val bodyOption: RequestReader[Option[String]] = ???
 
 
 	<section class="slide"><div>
-		<h2>RequestReaders</h2>
-<pre><code class="scala">case class User(id: Int, name: Option[String])
-
-val user1: RequestReader[User] = 
-  (param("id").as[Int] <mark>::</mark> paramOption("name")).<mark>as[User]</mark>
-
-val user2: RequestReader[User] = 
-  RequestReader.<mark>derive[User]</mark>.fromParams
-</code></pre>
-	</div></section>
-
-
-
-	<section class="slide"><div>
 		<h2>Routers</h2>
-<pre><code class="scala">trait Router[A] extends (Input => Option[(Input, <mark>() => Future[A]</mark>)])
-
-def get[A](r: Router[A]): Router[A] = ???
-def post[A](r: Router[A]): Router[A] = ???
+<pre><code class="scala">trait Router[A] extends (Input => Option[(Input, <mark>() => Future[A]</mark>)]) {
+  def <mark>/</mark>[B](that: Router[B]): Router[A :: B :: HNil]
+  def <mark>:+:</mark>[B](that: Router[B]): Router[A :+: B :+: CNil]
+  def <mark>?</mark>[B](that: RequestReader[B]): Router[A :: B :: HNil]
+}
 ...
 val int: Router[Int] = ???
 val string: Router[String] = ???
@@ -329,25 +318,9 @@ val string: Router[String] = ???
 
 
 
-	<section class="slide"><div>
-		<h2>Routers</h2>
-<pre><code class="scala">// GET /hello/:name?title=Mr.
-val greet1: Router[String :: Option[String] :: HNil] = 
-  get("hello" / string ? paramOption("title"))
-
-val greet2: Router[String] = 
-  greet1 { (name: String, title: Option[String]) =>
-    s"Hello, ${title.getOrElse("")} $name"
-  }
-</code></pre>
-	</div></section>
-
-
-
-
 
 	<section class="slide shout"><div>
-		<h2>Demo: <mark>coproduct routers</mark></h2>
+		<h2>Demo: <mark>Shapeless and Circe</mark></h2>
 	</div></section>
 
 
