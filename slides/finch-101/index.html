@@ -203,21 +203,6 @@
 
 
 
-     <section class="slide"><div>
-		<h2>Stack.Params</h2>
-<pre><code class="scala">case class ConnectionsLimit(limit: Int)
-object ConnectionsLimit {
-  implicit val param: Stack.Param[ConnectionsLimit] = 
-    Stack.Param(ConnectionsLimit(<mark>Int.MaxValue</mark>))
-}
-
-Http.server.<mark>configured</mark>(ConnectionsLimit(100)).serve(...)
-</code></pre>
-	</div></section>
-
-
-
-
 	<section class="slide shout"><div>
 		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finagle/StackParams.scala"><mark>finagle stack params</mark></a></h2>
 	</div></section>
@@ -360,63 +345,11 @@ val greet2: Router[String] =
 
 
 
-	<section class="slide"><div>
-		<h2>Routers</h2>
-<pre><code class="scala">trait Router[A] {
-  ...
-  def <mark>/</mark>[B](that: Router[B]): Router[A :: B :: HNil]
-  def <mark>:+:</mark>[B](that: Router[B]): Router[A :+: B :+: CNil]
-  def <mark>?</mark>[B](that: RequestReader[B]): Router[A :: B :: HNil]
-  ...
-}
-</code></pre>
-
-	</div></section>
-
-
-
-
-	<section class="slide"><div>
-		<h2>Routers</h2>
-<pre><code class="scala">val r1: Router[String] = ???
-val r2: Router[Int] = ???
-val r3: Router[String :+: Int :+: CNil] = r1 <mark>:+:</mark> r2
-
-val s: Service[Request, Response] = r3.<mark>toService</mark>
-</code></pre>
-
-	</div></section>
-
-
-
-
 
 	<section class="slide shout"><div>
 		<h2>Demo: <mark>coproduct routers</mark></h2>
 	</div></section>
 
-
-
-
-
-	<section class="slide"><div>
-		<h2>JSON support (via type classes)</h2>
-<pre><code class="scala">trait EncodeResponse[A] {
-  <mark>def apply(rep: A): Buf</mark>
-  def contentType: String
-  def charset: Option[String] = Some("utf-8")
-}
-
-trait DecodeRequest[A] {
-  <mark>def apply(req: String): Try[A]</mark>
-}</code></pre>
-	</div></section>
-
-
-
-	<section class="slide shout"><div>
-		<h2>Demo: <a href="https://github.com/vkostyukov/finch-101/blob/master/src/main/scala/i/f/workshop/finch/Time.scala"><mark>finch with circe</mark></a></h2>
-	</div></section>
 
 
 
