@@ -2,29 +2,15 @@
 layout: default
 title: Home
 cover: false
-about: about/
 ---
-
-<!--
-<header class="site-head" {% if page.cover %} style="background-image: url({{ page.cover }})"{% endif%}>
-    <div class="vertical">
-        <div class="site-head-content" class="inner">
-            {% if site.logo %}
-                <a class="blog-logo" href="{{ site.url }}">
-                    <img src="{{ site.url }}/{{ site.logo}}" alt="{{ site.name}}" />
-                </a>
-            {% endif %}
-        </div>
-    </div>
-</header>
--->
 
 <main class="content" role="main">
     <br />
     <center/>
-      <a href='{{site.baseurl}}'>[home]</a> 
-      <a href='{{site.baseurl}}{{ page.about }}'>[about me]</a>
-      <a href="{{site.baseurl}}rss.xml">[rss]</a>
+      <a href='{{site.url}}/'>[posts]</a> 
+      <a href='{{site.url}}/talks/'>[talks]</a> 
+      <a href='{{site.url}}/about/'>[about me]</a>
+      <a href="{{site.url}}/rss.xml">[rss]</a>
     </center>
 
     {% for post in paginator.posts %}

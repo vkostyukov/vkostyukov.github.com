@@ -3,10 +3,16 @@ description: "Research & Engineering"
 meta_description: ""
 
 markdown: redcarpet
-pygments: true
-paginate: 15
+highlighter: true
+paginate: 5
 permalink: /posts/:title
 
-# Details for the RSS feed generator
-url:            'http://vkostyukov.ru'
-author:         'Vladimir Kostyukov'
+gems: 
+  - jekyll-paginate
+  - jekyll-feed
+
+feed:
+  path: rss.xml
+
+url: 'http://vkostyukov.net'
+author: 'Vladimir Kostyukov'
