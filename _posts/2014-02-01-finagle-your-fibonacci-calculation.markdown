@@ -3,6 +3,7 @@ layout: post
 title:  "Finagle Your Fibonacci Calculation"
 date:   2014-02-01 10:00:00
 categories: scala, finagle
+disqus: true
 ---
 
 [Finagle][1] is an RPC library for JVM that allows you to develop service-based applications in a protocol-agnostic way. Formally, the Finagle library provides both asynchronous runtime via [futures][2] and protocol-independence via [codecs][3]. In this post I will try to build a Finagle-powered distributed [Fibonacci Numbers][4] calculator that scales up to thousands of nodes.

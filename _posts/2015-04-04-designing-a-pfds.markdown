@@ -3,6 +3,7 @@ layout: post
 title:  "Designing a Purely Functional Data Structure"
 date:   2015-04-04 10:00:00
 categories: scala, fp
+disqus: true
 ---
 
 Functional programming nicely leverages constraints on _how_ programs are written thereby promoting a clean and easy to reason about coding style. *Purely functional data structures* are (surprisingly) built out of those constraints. They are **persistent** (FP implies that both _old_ and _new_ versions of an updated object are available) and backed by **immutable** objects (FP doesn't support _destructive updates_). Needless to say, it's a challenge to design a purely functional data structure that meets performance requirements of its imperative sibling. Fortunately, it's quite possible in most of the cases, even for those data structures whose reference implementations are backed by mutable arrays. This post precisely describes a process of designing a purely functional implementation technique for [Standard Binary Heaps][0], with the same asymptotic bounds as in an imperative setting.

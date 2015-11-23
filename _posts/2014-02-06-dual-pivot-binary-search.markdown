@@ -3,6 +3,7 @@ layout: post
 title:  "Dual-Pivot Binary Search"
 date:   2014-02-06 10:00:00
 categories: java, algorithms
+disqus: true
 ---
 
 In 2009, Vladimir Yaroslavski introduced a [Dual-Pivot QuickSort][1] algorithm, which is currently the default sorting algorithm for primitive types in Java 8. The idea behind this algorithm is both simple and awesome. Instead of using single pivot element, it uses two pivots that divide an input array into three intervals (against two intervals in original [QuickSort][3]). This allowed to decrease the height of [recursion tree][2] as well as reduce the number of comparisons. The post describes a similar dual-pivot approach but for a [BinarySearch][4] algorithm. Thus, our modified binary search algorithm has prefix *Dual-Pivot*.

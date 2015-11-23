@@ -3,6 +3,7 @@ layout: post
 title:  "Combinatorial Algorithms in Scala"
 date:   2014-04-01 10:00:00
 categories: scala, algorithms
+disqus: true
 ---
 
 [Combinatorics][1] is a branch of mathematics that mostly focuses on problems of counting the structures of given size and kind. The most famous and well-known examples of such problems might be often asked as job interview questions. This blog post presents four generational problems ([combinations][2], [subsets][3], [permutations][4] and [variations][5]) along with their _purely functional_ implementations in Scala.
