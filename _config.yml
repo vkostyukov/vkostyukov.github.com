@@ -2,7 +2,6 @@ name: Vladimir Kostyukov
 description: "Research & Engineering"
 meta_description: ""
 
-markdown: redcarpet
 highlighter: true
 paginate: 5
 permalink: /posts/:title/
