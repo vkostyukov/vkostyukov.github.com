@@ -1,0 +1,711 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>Finagle Under the Hood</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=792, user-scalable=no">
+	<link rel="stylesheet" href="shower/themes/bright/styles/screen.css">
+	<link rel="stylesheet" href="highlight/styles/default.css">
+	<style>
+		code {
+			font-size: 18px;
+		}
+		.slide p.note {
+			font-size: 18px;
+		}
+		.slide.shout h2 {
+			font-size: 60px;
+		}
+		.slide pre mark.red {
+			background: #FFA1A1;
+		}
+		.slide pre code {
+			line-height: 133%;
+		}
+		.coding-time h2 {
+			font-family: "Open Sans", sans-serif;
+			color: #FFF;
+			font-size: 46px;
+			font-weight: bold;
+		}
+		</style>
+	</style>
+</head>
+<body class="full">
+
+	<section class="slide cover" id="Cover"><div>
+		<div style="margin-top: 16%;">
+			<h2><strong>Finagle<strong></h2>
+			<p>Under The Hood</p>
+		</div>
+		<p><a href="https://twitter.com/vkostyukov">@vkostyukov</a></p>
+		<style>
+			#Cover.slide {
+				background: #FFF;
+			}
+			#Cover h2 {
+				font-family: "Open Sans", sans-serif;
+				margin:20px 0 0;
+				color:#444;
+				text-align:center;
+				font-size:82px;
+				}
+			#Cover p {
+				margin:12px 0 0;
+				text-align:center;
+				color:#444;
+				font-size:24px;
+				}
+			#Cover p a {
+				color:#4099FF;
+				font-size:28px;
+				}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>$ whoami </h2>
+		<ul>
+			<li>2010-2014: Compiler Engineer at Intel (ART/DalvikVM <a href="https://android-review.googlesource.com/#/q/Vladimir+Kostyukov">contributor</a>)</li>
+			<li>Since 2013: <a href="https://github.com/vkostyukov/scalacaster">Scalacaster</a>
+			<li>Since 2014: <a href="https://github.com/finagle/finch">Finch</a>, <a href="https://github.com/finagle/finagle-oauth2">finagle-oauth2</a>, <a href="https://github.com/finagle/finagle-serial">finagle-serial</a>, ...</li> 
+			<li>Since 2014: Scala Developer at Twitter (<a href="https://github.com/twitter/finagle">Finagle</a> team)</li>
+			<li>Since 2015: Pretending to be <a href="https://twitter.com/finagle">@finagle</a> on Twitter</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide" id="Finagle"><div>
+		<img src="pictures/finagle-logo.png" alt="" height="500px" class="place c">
+		<style>
+			#Finagle img {
+				margin-top: -40px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<div align="center" style="margin-top: 60px;">
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">The key problem with <a href="https://twitter.com/hashtag/Finagle?src=hash">#Finagle</a> adoption that it solves tons of problems that you know nothing about until it&#39;s too late <a href="https://twitter.com/hashtag/FinagleCon?src=hash">#FinagleCon</a></p>&mdash; Alexey Kachayev (@kachayev) <a href="https://twitter.com/kachayev/status/631928029258772480">August 13, 2015</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+		</div>
+	</div></section>
+
+
+
+	<section class="slide" id="FinagleGithub"><div>
+		<img src="pictures/finagle-github.png" height="200px" alt="" class="place c">
+		<style>
+			#FinagleGithub img {
+				margin-top: 10px;
+				margin-left: -20px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finagle: Status</h2>
+		<ul>
+			<li>Around since <a href="https://twitter.com/finagle/status/567885703180259328">since Aug 2010</a></li>
+			<li><strong>Top 7</strong> Scala project on Github</li>
+			<li>15+ protocols implemented, including <a href="http://twitter.github.io/finagle/guide/Protocols.html#mux">Mux</a> (our own multiplexing protocol), <a href="https://github.com/twitter/finagle/tree/master/finagle-http">HTTP</a>, <a href="https://github.com/twitter/finagle/tree/master/finagle-thrift">Thrift</a>, <a href="https://github.com/twitter/finagle/tree/master/finagle-memcachedx">Memcached</a>, <a href="https://github.com/twitter/finagle/tree/master/finagle-mysql">MySql</a></li>
+			<li>HTTP/2 (as well as Netty 4 migration) is in-progress</li>
+			<li>Rich ecosystem: <a href="https://twitter.github.io/finatra/">Finatra</a>, <a href="https://github.com/finagle/finch">Finch</a>, <a href="https://twitter.github.io/twitter-server/">Twitter Server</a>, ...</li>
+		</ul>
+	</div></section>
+
+
+
+
+
+
+	<section class="slide"><div>
+		<h2>Finagle: @Twitter</h2>
+		<ul>
+			<li>Core System Libraries (10 engineers): A dedicated <a href="https://twitter.com/vkostyukov/status/613840446725357569">team</a> that maintains <a href="https://github.com/twitter/finagle">Finagle</a>, <a href="https://github.com/twitter/util">Util</a>, <a href="https://github.com/twitter/twitter-server">TwitterServer</a>, <a href="https://github.com/twitter/scrooge">Scrooge</a>, and <a href="https://twitter.github.io/finatra/">Finatra</a></li>
+			<li>Internal <a href="https://groups.google.com/forum/#!forum/finaglers">@finaglers</a></li>
+			<li>On-call rotations</li>
+			<li><a href="https://twitter.com/monorepi">Monorepo</a> and monobuild: no milestones</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<div align="center" style="margin-top: 60px;">
+
+		<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">This is third major clone of <a href="https://twitter.com/finagle">@finagle</a> I am aware of, other ones are in Rust and Java 8<a href="https://t.co/eewNYEaQPE">https://t.co/eewNYEaQPE</a></p>&mdash; Mansur Ashraf (@mansur_ashraf) <a href="https://twitter.com/mansur_ashraf/status/722861932772851714">April 20, 2016</a></blockquote>
+		<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+	</div></section>
+
+
+
+
+	<section class="slide shout"><div>
+		<h2>The Big Picture</h2>
+	</div></section>
+
+
+
+
+	<section class="slide" id="Service"><div>
+		<h2>Your Server as <a href="http://monkey.org/~marius/funsrv.pdf">a Function</a></h2>
+<pre class="place c"><code class="scala">trait Service[<mark>-Req</mark>, <mark>+Rep</mark>] extends (Req => Future[Rep])
+</code></pre>
+		<style>
+			#Service code {
+				font-size: 22px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+	<section class="slide" id="Finagle101"><div>
+		<img src="pictures/finagle-102.png" height="800px" alt="" class="place c">
+		<style>
+			#Finagle101 img {
+				margin-top: 10px;
+				margin-left: -20px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+
+
+	<section class="slide white" id="FinagleStacks"><div>
+		<img src="pictures/finagle-stacks1.png" height="750px" alt="" class="place c">
+		<style>
+			#FinagleStacks img {
+				margin-top: 0px;
+				margin-left: 0px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+
+
+
+     <section class="slide"><div>
+		<h2>Servers, Clients, Services, oh my!</h2>
+		<ul>
+			<li>Services are symmetric</li>
+			<li>Clients <i>produce</i> (e.g., <code>Http.client.newService</code>) Services</li>
+			<li>Servers <i>serve</i> (e.g., <code>Http.server.serve</code>) Services</li>
+		</ul>
+	</div></section>
+
+
+
+
+
+	<section class="slide shout"><div>
+		<h2><a href="http://twitter.github.io/finagle/guide/Configuration.html">Configuration</a></h2>
+	</div></section>
+
+
+
+
+     <section class="slide"><div>
+		<h2>Configuring Servers and Clients</h2>
+		<ul>
+			<li>Configuration is code (not CLI flags, not config files)</li>
+			<li><a href="https://finagle.github.io/blog/2016/02/05/release-notes-6-33/">Conventional API</a> (builder) pattern: <br /><code>&lt;Protocol&gt;.client.with*</code> and <code>&lt;Protocol&gt;.server.with*</code></li>
+			<li>Separate expert-level API: <code>.configured</code>, <code>.transformed</code>, <code>.filtered</code></li>
+			<li>100% Java friendly</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide shout"><div>
+		<h2><a href="http://twitter.github.io/finagle/guide/Servers.html">Servers</a></h2>
+	</div></section>
+
+
+    <section class="slide"><div>
+		<h2>What does the <mark>server</mark> do?</h2>
+		<ul>
+			<li>Admission Control</li>
+			  <ul>
+			  	<li>Concurrency Limit</li>
+			  	<li>Request Deadline*</li>
+			  </ul>
+			<li>Request Timeout</li>
+			<li>Metrics and Tracing</li>
+		</ul>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2><mark>Server:</mark> Concurrency Limit</h2>
+<pre><code class="scala">import com.twitter.finagle.Http
+
+val server = Http.server
+  .withAdmissionControl.concurrencyLimit(
+    maxConcurrentRequests = 10,
+    maxWaiters = 0
+  )
+</code></pre>
+	<p class="note">
+		Maintains the concurrency level of this server (default: <code>disabled</code>).
+	</p>
+</div></section>
+
+
+
+
+
+
+	<section class="slide"><div>
+		<h2><mark>Server and Client:</mark> Request Timeout</h2>
+<pre><code class="scala">import com.twitter.conversions.time._
+import com.twitter.finagle.Http
+
+val server = Http.server
+  .withRequestTimeout(42.seconds)
+</code></pre>
+	<p class="note">
+		Time out requests that weren't handled in a given time<br />
+		(default: <code>disabled</code>).
+	</p>
+</div></section>
+
+
+
+
+	<section class="slide shout"><div>
+		<h2><a href="http://twitter.github.io/finagle/guide/Clients.html">Clients</a></h2>
+	</div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2>What does the <mark>client</mark> do?</h2>
+		<ul style="-webkit-column-count: 2;">
+			<li><strong>Retries</strong></li>
+			<li>Naming / Service Discovery</li>
+			<li>Backpressure</li>
+			<li><strong>Timeouts and Expirations</strong></li>
+			<li><strong>Load Balancing</strong></li>
+			<li>Rate Limiting</li>
+			<li><strong>Connection Pooling</strong></li>
+			<li><strong>Circuit Breaking / Failure Detection</strong></li>
+			<li>Metrics and Tracing</li>
+			<li>Interrupts</li>
+			<li>Context Propagation</li>
+			<li>...</li>
+		</ol>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<div align="center" style="margin-top: 60px;">
+		<blockquote class="twitter-tweet" data-conversation="none" data-lang="en"><p lang="en" dir="ltr">Quick poll by <a href="https://twitter.com/kevino">@kevino</a>: Does Finagle treat HTTP 500 response as a failure or success?</p>&mdash; Finagle (@finagle) <a href="https://twitter.com/finagle/status/697184041267662849">February 9, 2016</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>	</div></div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Response Classification</h2>
+		<ul>
+			<li><code>finagle-core</code> knows nothing about the protocol/application its used by</li>
+			<li>We need a way to teach circuit breakers/load balancers how to identify failure responses</li>
+			<li><a href="https://finagle.github.io/blog/2016/02/09/response-classification/">Response Classifiers</a>, a protocol-agnostic tool that solves it</li>
+		</ul>
+	</div></section>
+
+
+
+			<section class="slide"><div>
+		<h2><mark>Client:</mark> Response Classification</h2>
+<pre><code class="scala">import com.twitter.finagle.{Http, http}
+import com.twitter.finagle.service._
+import com.twitter.util._
+
+val classifier: ResponseClassifier = {
+  case ReqRep(_, Return(r: http.Response)) if r.statusCode == 503 =>
+    ResponseClass.NonRetryableFailure
+}
+
+val client = Http.client
+  .withResponseClassifier(classifier)</code></pre>
+	<p class="note">Treat <code>503 (Service Unavailable)</code> as a non-retriable failure.</p>
+</div></section>
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Retries</h2>
+		<ul>
+			<li>Lives in the <strong>top of the stack</strong> and retries failures from the underlying modules (timeouts, failure detectors, etc)</li>
+			<li>Only <strong>retries when it's safe</strong> to do so (eg: exceptions that occurred before the bytes were written to the wire and protocol level NACKs)</li> and when <code>RetryBuget</code> (leaky token bucket) allows it
+			<li><strong>Backoffs</strong> between retries for a given amount of time</li>
+		</ul>
+
+	</div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> <a href="https://finagle.github.io/blog/2016/02/08/retry-budgets/">Retry Budget</a></h2>
+<pre><code class="scala">import com.twitter.finagle.Http
+import com.twitter.conversions.time._
+import com.twitter.finagle.service.RetryBudget
+
+val budget = RetryBudget(
+  ttl = 10.seconds,
+  minRetriesPerSec = 5,
+  percentCanRetry = 0.1
+)
+
+val client = Http.client.withRetryBudget(budget)
+</code></pre>
+	<p class="note">Allow retrying <code>10%</code> of total requests on top of <code>5</code> retries per second.</p>
+
+	</div></section>
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Retry Backoff</h2>
+		<ul>
+			<li>Build on top of <code>Stream[Duration]</code></li>
+			<li>A variety of predefined policies (even <a href="http://www.awsarchitectureblog.com/2015/03/backoff.html">jittered</a>):</li>
+			<ul>
+				<li><code>Backoff.linear</code> and <code>Backoff.exponential</code></li>
+				<li><code>Backoff.exponentialJittered</code></li>
+				<li><code>Backoff.equalJittered</code></li>
+				<li><code>Backoff.decorrelatedJittered</code></li>
+			</ul>
+		</ul>
+
+	</div></section>
+
+
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Retry Backoff</h2>
+<pre><code class="scala">import com.twitter.finagle.Http
+import com.twitter.conversions.time._
+import com.twitter.finagle.service.Backoff
+
+val client = Http.client
+  .withRetryBackoff(Backoff.exponentialJittered(2.seconds, 32.seconds))
+</code></pre>
+	<p class="note">Backoff for <code>rnd(2s), rnd(4s), rnd(8), ..., rnd(32s), ... rnd(32s)</code></p>
+	</div></section>
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Timeouts</h2>
+<pre><code class="scala">import com.twitter.conversions.time._
+import com.twitter.finagle.Http
+
+val client = Http.client
+  .withTransport.connectTimeout(1.second) // TCP connect
+  .withSession.acquisitionTimeout(42.seconds)
+  .withSession.maxLifeTime(20.seconds) // connection max life time
+  .withSession.maxIdleTime(10.seconds) // connection max idle time
+</code></pre>
+	</div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Load Balancing</h2>
+		<ul>
+			<li>A client treats its server set as <strong>replica set</strong></li>
+			<li>Load balancing involves <strong>traffic distributor</strong> and <strong>load factor</strong></li>
+			<li>Currently available</li>
+			<ul>
+				<li>Load distributors: <strong>heap</strong>, <strong>p2c</strong>, <strong>aperture</strong>, <strong>round robin</strong></li>
+				<li>Load factors: <strong>least loaded</strong>, <strong>peak EWMA</strong></li>
+			</ul>
+		</ul>
+	</div></section>
+
+
+
+	<section class="slide white" id="FinagleHeap"><div>
+		<img src="pictures/heap-lb1.png" height="600px" alt="" class="place c">
+		<style>
+			#FinagleHeap img {
+				margin-top: 0px;
+				margin-left: 0px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+		<section class="slide white" id="FinagleP2C"><div>
+		<img src="pictures/p2c1.png" height="600px" alt="" class="place c">
+		<style>
+			#FinagleP2c img {
+				margin-top: 0px;
+				margin-left: 0px;
+			}
+		</style>
+	</div></section>
+
+
+    <section class="slide"><div>
+		<h2>EWMA (Exp Weighted Moving Avg)</h2>
+		<ul>
+			<li>Keeps track of <strong>RTT latency</strong> weighted by <strong>load</strong> of each replica</li>
+			<li>Involves both RPC latency and queue depth</li>
+			<li>Sensitive to peaks</li>
+			<li>Protects against latency (eg: JVM full GC and warmup)</li>
+		</ul>
+
+	</div></section>
+
+
+
+
+	<section class="slide white" id="FinagleLB"><div>
+		<img src="pictures/latency-experiment-results.png" height="530px" alt="" class="place r" />
+		<span style="margin-left: -30px;">When timeout is <mark>1 second</mark></span>
+		<ul>
+			<li>Round Robin SR is 95%</li>
+			<li>Least Loaded SR is 99%</li>
+			<li>EWMA SR is <strong>99.9%</strong></li>
+		</ul>
+		<br/><br/><br/><br/><br/>
+		<p style="font-size: 16px; margin-left: -90px;">
+			Chart is from <a href="https://twitter.com/stevej">@stevej</a>'s (Buoyant, Inc) awesome <a href="https://blog.buoyant.io/2016/03/16/beyond-round-robin-load-balancing-for-latency/">blog post</a>.
+		</p>
+		<style>
+			#FinagleLB img {
+				margin-top: 0px;
+				margin-right: 20px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+			<section class="slide white" id="FinagleAperture"><div>
+		<img src="pictures/aperture1.png" height="600px" alt="" class="place c">
+		<style>
+			#FinagleAperture img {
+				margin-top: 0px;
+				margin-left: 0px;
+			}
+		</style>
+	</div></section>
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Load Balancing via Aperture</h2>
+		<ul>
+			<li>Employs a simple <strong>feedback controller</strong> based on the client’s load</li>
+			<li>Less connections from clients</li>
+			<li>Less connections to servers</li>
+			<li>Balances over fewer, and thus <strong>warmer</strong>, services</li>
+		</ul>
+
+	</div></section>
+
+
+
+		<section class="slide"><div>
+		<h2><mark>Client:</mark> Load Balancing via Aperture</h2>
+<pre><code class="scala">import com.twitter.conversions.time._
+import com.twitter.finagle.Http
+import com.twitter.finagle.loadbalancer.Balancers
+
+val balancer = Balancers.aperture(
+  lowLoad = 1.0, highLoad = 2.0, // the load band adjusting an aperture
+  minAperture = 10 // min aperture size
+)
+
+val client = Http.client.withLoadBalancer(balancer)
+</code></pre>
+</div></section>
+
+
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Circuit Breaking</h2>
+		<ul>
+			<li>Placed <strong>under LB</strong> to exclude particular nodes from its replica set</li>
+			<li>Currently implemented</li>
+			<ul>
+				<li><code>FailFast</code> - a session-driven circuit breaker</li>
+				<li><code>FailureAccrual</code> - a request-driven circuit breaker</li>
+				<li><code>ThresholdFailureDetector</code> - ping based failure detector (Mux only)</li>
+			</ul>
+		</ul>
+
+	</div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Failure Accrual</h2>
+		<ul>
+			<li>Our <strong>most advanced</strong> circuit breaker</li>
+			<li>Pluggable policies based on</li>
+			<ul>
+				<li>Required success rate</li>
+				<li>Number of consecutive failures</li>
+			</ul>
+			<li>By default</li>
+			<ul>
+				<li>Marks replica dead after <strong>5 failures</strong></li>
+				<li>Backoff and retry using <strong>equal jitter</strong></li>
+			</ul>
+		</ul>
+	</div></section>
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Circuit Breaking</h2>
+<pre><code class="scala">import com.twitter.conversions.time._
+import com.twitter.finagle.Http
+import com.twitter.finagle.service.{Backoff, FailureAccrualFactory.Param}
+import com.twitter.finagle.service.exp.FailureAccrualPolicy
+
+val twitter = Http.client
+  .configured(Param(() => FailureAccrualPolicy.successRate(
+    <mark>requiredSuccessRate = 0.95</mark>,
+    window = 100,
+    markDeadFor = Backoff.const(10.seconds)
+  )))
+</code></pre>
+<p class="note">Mark a replica dead if SR is below <code>95%</code> over the most recent <code>100</code> requests<br/>
+	and then backoff for <code>10 s</code>.</p>
+	</div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2><mark>Client:</mark> Connection Pooling</h2>
+		<ul>
+			<li>Every Finagle client (except for Mux) has <strong>builtin connection pool</strong></li>
+			<li>By default number of connections is unbounded</li>
+			<li>By default all created connections are cached for an unlimited time</li>
+		</ul>
+	</div></section>
+
+
+
+
+	<section class="slide white" id="FinaglePools"><div>
+		<img src="pictures/connection-pool1.png" height="650px" alt="" class="place c">
+		<style>
+			#FinaglePools img {
+				margin-top: 0px;
+				margin-left: 0px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+		<section class="slide"><div>
+		<h2><mark>Client:</mark> Connection Pooling</h2>
+<pre><code class="scala">import com.twitter.finagle.Http
+
+val client = Http.client
+  .withSessionPool.minSize(10)
+  .withSessionPool.maxSize(20)
+  .withSessionPool.maxWaiters(100)
+</code></pre>
+	<p class="note">
+		Maintains at least <code>10</code> and at max <code>20</code> connections with <code>100</code> connect requests waiting.
+	</p>
+</div></section>
+
+
+
+
+
+     <section class="slide"><div>
+		<h2>What else?</h2>
+		<ul>
+			<li>Tracing (via <a href="https://github.com/openzipkin">Zipkin</a>)</li>
+			<li>Metrics and HTTP admin interface (via <a href="https://twitter.github.io/twitter-server/">TwitterServer</a>)</li>
+			<li>Fast, Testable HTTP/Thrift services (via <a href="https://twitter.github.io/finatra/">Finatra</a>)</li>
+			<li>Purely Functional HTTP services (via <a href="https://github.com/finagle/finch">Finch</a> and <a href="https://github.com/travisbrown/circe">Circe</a>)</li>
+			<li>Type level HTTP clients (via <a href="https://github.com/finagle/featherbed">Featherbed</a>)</li>
+			<li>... and more at <a href="https://github.com/finagle">https://github.com/finagle</a></li>
+		</ul>
+	</div></section>
+
+
+
+
+
+	<section class="slide shout" id="Bye2"><div>
+		<h2><a href="https://github.com/twitter/finagle">https://github.com/twitter/finagle</a></h2>
+		<style>
+		  #Bye2 h2 {
+		   left: 80px;
+		  }
+		</style>
+	</div></section>
+
+
+
+
+	<!--
+		To hide progress bar from entire presentation
+		just remove “progress” element.
+		-->
+	<div class="progress"><div></div></div>
+	<script src="shower/shower.min.js"></script>
+	<script src="highlight/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61641022-1', 'auto');
+ga('send', 'pageview');
+	</script>
+	<!-- Copyright © 2014 Yours Truly, Famous Inc. -->
+	<!-- Photos by John Carey, fiftyfootshadows.net -->
+</body>
+</html>
