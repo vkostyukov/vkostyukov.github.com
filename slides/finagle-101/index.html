@@ -132,7 +132,7 @@
 	<section class="slide"><div>
 		<h2>Finagle: @Twitter</h2>
 		<ul>
-			<li>Core System Libraries (10 engineers): A dedicated <a href="https://twitter.com/vkostyukov/status/613840446725357569">team</a> that maintains <a href="https://github.com/twitter/finagle">Finagle</a>, <a href="https://github.com/twitter/util">Util</a>, <a href="https://github.com/twitter/twitter-server">TwitterServer</a> and <a href="https://github.com/twitter/scrooge">Scrooge</a></li>
+			<li>Core System Libraries (10 engineers): A dedicated <a href="https://twitter.com/vkostyukov/status/613840446725357569">team</a> that maintains <a href="https://github.com/twitter/finagle">Finagle</a>, <a href="https://github.com/twitter/util">Util</a>, <a href="https://github.com/twitter/twitter-server">TwitterServer</a>, <a href="https://github.com/twitter/scrooge">Scrooge</a>, and <a href="https://twitter.github.io/finatra/">Finatra</a></li>
 			<li>Internal <a href="https://groups.google.com/forum/#!forum/finaglers">@finaglers</a></li>
 			<li>On-call rotations</li>
 			<li><a href="https://twitter.com/monorepi">Monorepo</a> and monobuild: no milestones</li>
@@ -161,7 +161,7 @@
 
 	<section class="slide" id="Service"><div>
 		<h2>Your Server as <a href="http://monkey.org/~marius/funsrv.pdf">a Function</a></h2>
-<pre class="place c"><code class="scala">trait Service[<mark>-Req</mark>, <mark>+Req</mark>] extends (Req => Future[Rep])
+<pre class="place c"><code class="scala">trait Service[<mark>-Req</mark>, <mark>+Rep</mark>] extends (Req => Future[Rep])
 </code></pre>
 		<style>
 			#Service code {
@@ -208,8 +208,8 @@
 		<h2>Servers, Clients, Services, oh my!</h2>
 		<ul>
 			<li>Services are symmetric</li>
-			<li>Clients <i>produce</i> (i.e., <code>Http.client.newService</code>) Services</li>
-			<li>Servers <i>serve</i> (i.e., <code>Http.server.serve</code>) Services</li>
+			<li>Clients <i>produce</i> (e.g., <code>Http.client.newService</code>) Services</li>
+			<li>Servers <i>serve</i> (e.g., <code>Http.server.serve</code>) Services</li>
 		</ul>
 	</div></section>
 
@@ -229,7 +229,7 @@
 		<ul>
 			<li>Configuration is code (not CLI flags, not config files)</li>
 			<li><a href="https://finagle.github.io/blog/2016/02/05/release-notes-6-33/">Conventional API</a> (builder) pattern: <br /><code>&lt;Protocol&gt;.client.with*</code> and <code>&lt;Protocol&gt;.server.with*</code></li>
-			<li>Separated expert-level API: <code>.configured</code>, <code>.transformed</code>, <code>.filtered</code></li>
+			<li>Separate expert-level API: <code>.configured</code>, <code>.transformed</code>, <code>.filtered</code></li>
 			<li>100% Java friendly</li>
 		</ul>
 	</div></section>
@@ -245,10 +245,10 @@
     <section class="slide"><div>
 		<h2>What does the <mark>server</mark> do?</h2>
 		<ul>
-			<li>Adminssion Control</li>
+			<li>Admission Control</li>
 			  <ul>
 			  	<li>Concurrency Limit</li>
-			  	<li>Request Deadline</li>
+			  	<li>Request Deadline*</li>
 			  </ul>
 			<li>Request Timeout</li>
 			<li>Metrics and Tracing</li>
@@ -271,26 +271,6 @@ val server = Http.server
 		Maintains the concurrency level of this server (default: <code>disabled</code>).
 	</p>
 </div></section>
-
-
-
-
-
-	<section class="slide"><div>
-		<h2><mark>Server:</mark> Request Deadline</h2>
-<pre><code class="scala">import com.twitter.conversions.time._
-import com.twitter.finagle.Http
-
-val server = Http.server
-  .withAdmissionControl.deadlineTolerance(200.milliseconds)
-  .withAdmissionControl.deadlineMaxRejectedPercentage(0.3)
-</code></pre>
-	<p class="note">
-		Reject requests those deadline is passed<br />
-		(default: <code>tolerance = 170ms</code>, <code>maxRejectedPercentage = 20%</code>).
-	</p>
-</div></section>
-
 
 
 
@@ -331,7 +311,8 @@ val server = Http.server
 			<li><strong>Connection Pooling</strong></li>
 			<li><strong>Circuit Breaking / Failure Detection</strong></li>
 			<li>Metrics and Tracing</li>
-			<li>Interrupts/Context Propagation</li>
+			<li>Interrupts</li>
+			<li>Context Propagation</li>
 			<li>...</li>
 		</ol>
 	</div></section>
@@ -411,7 +392,7 @@ val client = Http.client.withRetryBudget(budget)
     <section class="slide"><div>
 		<h2><mark>Client:</mark> Retry Backoff</h2>
 		<ul>
-			<li>Build on top of <code>Stream[Duraion]</code></li>
+			<li>Build on top of <code>Stream[Duration]</code></li>
 			<li>A variety of predefined policies (even <a href="http://www.awsarchitectureblog.com/2015/03/backoff.html">jittered</a>):</li>
 			<ul>
 				<li><code>Backoff.linear</code> and <code>Backoff.exponential</code></li>
@@ -436,7 +417,7 @@ import com.twitter.finagle.service.Backoff
 val client = Http.client
   .withRetryBackoff(Backoff.exponentialJittered(2.seconds, 32.seconds))
 </code></pre>
-	<p class="note">Backoff for <code>rand(2s), rand(4s), ..., rand(32s), ... rand(32s)</code></p>
+	<p class="note">Backoff for <code>rnd(2s), rnd(4s), rnd(8), ..., rnd(32s), ... rnd(32s)</code></p>
 	</div></section>
 
 
@@ -464,7 +445,7 @@ val client = Http.client
 			<li>Load balancing involves <strong>traffic distributor</strong> and <strong>load factor</strong></li>
 			<li>Currently available</li>
 			<ul>
-				<li>Traffic distributors: <strong>heap</strong>, <strong>p2c (power of 2 choices)</strong></li>
+				<li>Load distributors: <strong>heap</strong>, <strong>p2c</strong>, <strong>aperture</strong>, <strong>round robin</strong></li>
 				<li>Load factors: <strong>least loaded</strong>, <strong>peak EWMA</strong></li>
 			</ul>
 		</ul>
@@ -638,7 +619,7 @@ val twitter = Http.client
 		<h2><mark>Client:</mark> Connection Pooling</h2>
 		<ul>
 			<li>Every Finagle client (except for Mux) has <strong>builtin connection pool</strong></li>
-			<li>By default number of connections is unbounded and roughly equals client's concurrency level</li>
+			<li>By default number of connections is unbounded</li>
 			<li>By default all created connections are cached for an unlimited time</li>
 		</ul>
 	</div></section>
@@ -682,7 +663,7 @@ val client = Http.client
 		<ul>
 			<li>Tracing (via <a href="https://github.com/openzipkin">Zipkin</a>)</li>
 			<li>Metrics and HTTP admin interface (via <a href="https://twitter.github.io/twitter-server/">TwitterServer</a>)</li>
-			<li>Opinionated and Testable HTTP/Thrift services (via <a href="https://twitter.github.io/finatra/">Finatra</a>)</li>
+			<li>Fast, Testable HTTP/Thrift services (via <a href="https://twitter.github.io/finatra/">Finatra</a>)</li>
 			<li>Purely Functional HTTP services (via <a href="https://github.com/finagle/finch">Finch</a> and <a href="https://github.com/travisbrown/circe">Circe</a>)</li>
 			<li>Type level HTTP clients (via <a href="https://github.com/finagle/featherbed">Featherbed</a>)</li>
 			<li>... and more at <a href="https://github.com/finagle">https://github.com/finagle</a></li>
