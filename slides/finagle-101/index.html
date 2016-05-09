@@ -33,7 +33,16 @@
 </head>
 <body class="full">
 
-	<section class="slide cover" id="Cover"><div>
+	<section class="slide cover w"><div>
+		<img src="pictures/init-1.png" />
+	</div></section>
+
+		<section class="slide cover w"><div>
+		<img src="pictures/init-2.png" />
+	</div></section>
+
+
+<!-- 	<section class="slide cover" id="Cover"><div>
 		<div style="margin-top: 16%;">
 			<h2><strong>Finagle<strong></h2>
 			<p>Under The Hood</p>
@@ -61,13 +70,14 @@
 				font-size:28px;
 				}
 		</style>
-	</div></section>
+	</div></section> -->
 
 
 
 	<section class="slide"><div>
 		<h2>$ whoami </h2>
 		<ul>
+			<li><mark>@vkostyukov</mark> <a href="https://twitter.com/vkostyukov">on Twitter</a> and <a href="https://github.com/vkostyukov">on Github</a></li>
 			<li>2010-2014: Compiler Engineer at Intel (ART/DalvikVM <a href="https://android-review.googlesource.com/#/q/Vladimir+Kostyukov">contributor</a>)</li>
 			<li>Since 2013: <a href="https://github.com/vkostyukov/scalacaster">Scalacaster</a>
 			<li>Since 2014: <a href="https://github.com/finagle/finch">Finch</a>, <a href="https://github.com/finagle/finagle-oauth2">finagle-oauth2</a>, <a href="https://github.com/finagle/finagle-serial">finagle-serial</a>, ...</li> 
@@ -96,18 +106,6 @@
 <blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">The key problem with <a href="https://twitter.com/hashtag/Finagle?src=hash">#Finagle</a> adoption that it solves tons of problems that you know nothing about until it&#39;s too late <a href="https://twitter.com/hashtag/FinagleCon?src=hash">#FinagleCon</a></p>&mdash; Alexey Kachayev (@kachayev) <a href="https://twitter.com/kachayev/status/631928029258772480">August 13, 2015</a></blockquote>
 <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
 		</div>
-	</div></section>
-
-
-
-	<section class="slide" id="FinagleGithub"><div>
-		<img src="pictures/finagle-github.png" height="200px" alt="" class="place c">
-		<style>
-			#FinagleGithub img {
-				margin-top: 10px;
-				margin-left: -20px;
-			}
-		</style>
 	</div></section>
 
 
@@ -204,19 +202,6 @@
 
 
 
-     <section class="slide"><div>
-		<h2>Servers, Clients, Services, oh my!</h2>
-		<ul>
-			<li>Services are symmetric</li>
-			<li>Clients <i>produce</i> (e.g., <code>Http.client.newService</code>) Services</li>
-			<li>Servers <i>serve</i> (e.g., <code>Http.server.serve</code>) Services</li>
-		</ul>
-	</div></section>
-
-
-
-
-
 	<section class="slide shout"><div>
 		<h2><a href="http://twitter.github.io/finagle/guide/Configuration.html">Configuration</a></h2>
 	</div></section>
@@ -245,11 +230,7 @@
     <section class="slide"><div>
 		<h2>What does the <mark>server</mark> do?</h2>
 		<ul>
-			<li>Admission Control</li>
-			  <ul>
-			  	<li>Concurrency Limit</li>
-			  	<li>Request Deadline*</li>
-			  </ul>
+		  	<li>Concurrency Limit</li>
 			<li>Request Timeout</li>
 			<li>Metrics and Tracing</li>
 		</ul>
@@ -304,12 +285,12 @@ val server = Http.server
 		<ul style="-webkit-column-count: 2;">
 			<li><strong>Retries</strong></li>
 			<li>Naming / Service Discovery</li>
-			<li>Backpressure</li>
 			<li><strong>Timeouts and Expirations</strong></li>
 			<li><strong>Load Balancing</strong></li>
 			<li>Rate Limiting</li>
-			<li><strong>Connection Pooling</strong></li>
-			<li><strong>Circuit Breaking / Failure Detection</strong></li>
+			<li>Connection Pooling</li>
+			<li><strong>Circuit Breaking</strong></li>
+			<li><strong>Failure Detection</strong></li>
 			<li>Metrics and Tracing</li>
 			<li>Interrupts</li>
 			<li>Context Propagation</li>
@@ -442,7 +423,7 @@ val client = Http.client
 		<h2><mark>Client:</mark> Load Balancing</h2>
 		<ul>
 			<li>A client treats its server set as <strong>replica set</strong></li>
-			<li>Load balancing involves <strong>traffic distributor</strong> and <strong>load factor</strong></li>
+			<li>Load balancing involves <strong>load distributor</strong> and <strong>load factor</strong></li>
 			<li>Currently available</li>
 			<ul>
 				<li>Load distributors: <strong>heap</strong>, <strong>p2c</strong>, <strong>aperture</strong>, <strong>round robin</strong></li>
@@ -615,49 +596,6 @@ val twitter = Http.client
 
 
 
-    <section class="slide"><div>
-		<h2><mark>Client:</mark> Connection Pooling</h2>
-		<ul>
-			<li>Every Finagle client (except for Mux) has <strong>builtin connection pool</strong></li>
-			<li>By default number of connections is unbounded</li>
-			<li>By default all created connections are cached for an unlimited time</li>
-		</ul>
-	</div></section>
-
-
-
-
-	<section class="slide white" id="FinaglePools"><div>
-		<img src="pictures/connection-pool1.png" height="650px" alt="" class="place c">
-		<style>
-			#FinaglePools img {
-				margin-top: 0px;
-				margin-left: 0px;
-			}
-		</style>
-	</div></section>
-
-
-
-
-		<section class="slide"><div>
-		<h2><mark>Client:</mark> Connection Pooling</h2>
-<pre><code class="scala">import com.twitter.finagle.Http
-
-val client = Http.client
-  .withSessionPool.minSize(10)
-  .withSessionPool.maxSize(20)
-  .withSessionPool.maxWaiters(100)
-</code></pre>
-	<p class="note">
-		Maintains at least <code>10</code> and at max <code>20</code> connections with <code>100</code> connect requests waiting.
-	</p>
-</div></section>
-
-
-
-
-
      <section class="slide"><div>
 		<h2>What else?</h2>
 		<ul>
@@ -681,6 +619,16 @@ val client = Http.client
 		   left: 80px;
 		  }
 		</style>
+	</div></section>
+
+
+
+	<section class="slide cover w"><div>
+		<img src="pictures/finit-1.png" />
+	</div></section>
+
+	<section class="slide cover w"><div>
+		<img src="pictures/finit-2.png" />
 	</div></section>
 
 
