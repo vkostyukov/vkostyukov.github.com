@@ -6,7 +6,7 @@ categories: scala, finagle
 disqus: true
 ---
 
-This post based on my talk ["Finagle: Under the Hood"][sd-talk] that [was presented][sd-tweet]
+This post is based on my talk ["Finagle: Under the Hood"][sd-talk] that [was presented][sd-tweet]
 at Scala Days NYC. I thought I'd publish this for those who prefer reading instead of watching (video
 is not yet published anyway). The full [slide deck is available online][slides] as well.
 
@@ -26,12 +26,12 @@ When it comes to describing what Finagle can do, I really like Alexey’s tweet 
 
 The most important part here is: “Finagle solves tons of problems”. And it absolutely does.
 There are many different things (a user doesn't know about) happening underneath a Finagle client
-or a server to make sure sessions are reliable enough. Finagle is doing a great job in tolerating all
+or a server to make sure sessions are reliable enough. Finagle is doing a great job at tolerating all
 kinds of session and transport failures so its users usually don't even notice neither failures nor
 actions Finagle is taking to tolerate them.
 
-Finagle’s been around for quite a long time - [since 2010][finagle-bd]. With 4.5k stars, it’s 7th
-the most popular Scala project on Github. As for today more than 15 protocols implemented
+Finagle’s been around for quite a long time - [since 2010][finagle-bd]. With 4.5k stars, it’s the 7th
+most popular Scala project on Github. As for today more than 15 protocols are implemented,
 including our own multiplexing protocol [Mux][mux]. Mux is a full-duplex, multiplexing protocol that
 might be roughly viewed as a subset of HTTP/2 so it has low-level control messages for pings,
 interrupts, and many more. We will see later how we utilize those signals within Finagle.
@@ -39,10 +39,10 @@ interrupts, and many more. We will see later how we utilize those signals within
 Finagle has quite a specific mission to make RPC sessions fast, resilient, and easy to setup. Operating
 on Layer 5 of the OSI model, Finagle knows almost nothing about the application and even protocol
 it's used by. That's why it doesn't actually answer lots of application-specific questions like "How
-to do logging?", "How to do JSON?", "Where to define a REST controller?". To full-fill that gap and
+to do logging?", "How to do JSON?", "Where to define a REST controller?". To fulfill that gap and
 utilize Finagle's outstanding scalability and performance, people started building opinionated libraries
-and frameworks that supposed to answer all those question. Just to mention a couple of such libraries
-specificity designed for HTTP: [Finatra][finatra] and [Finch][finch].
+and frameworks that are supposed to answer all those question. Just to mention a couple of such libraries
+specifically designed for HTTP: [Finatra][finatra] and [Finch][finch].
 
 The [Finagle team at Twitter][csl] is called CSL (Core System Libraries). There are ~10 of us maintaining
 libraries that power Twitter’s distributed infrastructure. We own [Finagle][finagle], [Util][util],
@@ -77,8 +77,8 @@ Finagle **stack** on a left, [Netty][netty] **pipeline** on a right, and **trans
 
 <img src="/images/finagle-101/finagle-102.png" style="height: 400px;"/>
 
-This is really interesting combination: we’ve got two completely different worlds here. The
-service-oriented, type safe, powered by composition and functional abstractions Finagle world on a
+This is a really interesting combination: we’ve got two completely different worlds here. The
+service-oriented, type safe, powered by composition and functional abstractions Finagle world on the
 left. And event-based, untyped, low-level Netty world on the right. And transport glues them together.
 
 We will cover the left part here in this post. The Finagle stack is our generic abstraction used to
@@ -100,9 +100,9 @@ of connection stacks, which terminate with transport and a Netty pipeline.
 
 ### Configuration
 
-Before we go deeper into details about client/server modules, let’s discuss what they share in common -
+Before we go deeper into details about client/server modules, let’s discuss what they have in common -
 [a configuration API][finagle-with]. To be fair, that’s one of my favorite topics because I think
-it’s really tricky problem to build a configuration API that’s both easy-to-use (common things should
+it’s a really tricky problem to build a configuration API that’s both easy-to-use (common things should
 be easy to do) and powerful-enough (uncommon things should be possible to do). The current version of
 configuration API in Finagle is the third iteration of an idea that *configuration is a code*.
 
@@ -110,7 +110,7 @@ Configuration is always code (not CLI flags, not config files) in Finagle so it 
 compiler and auto-completes by your IDE. There is a convention on how to find an entry point API
 depending on the protocol you want to work with. Usually, you start with typing something like
 `Http.client.with` and see what’s possible to configure/override on a given client. We separate
-commonly-configured params from ones we think it might be dangerous to tweak today. We call those
+commonly-configured params from the ones we think it might be dangerous to tweak today. We call those
 expert-level and use slightly different API to override them. The expert-level API is
 usually not so friendly and discoverable as `with`-API, which works perfectly as a red flag:
 if you’re not having a good time writing configuration, you’re probably doing something wrong or
@@ -118,13 +118,13 @@ dangerous.
 
 ### Servers
 
-Servers are quite simple in Finagle. They are optimized for high-throughput by doing as less as possible
-op top of just handling requests. At the minimum, a Finagle server do tracing and metrics, maintains
+Servers are quite simple in Finagle. They are optimized for high-throughput by doing as little as possible
+on top of just handling requests. At the minimum, a Finagle server does tracing and metrics, maintains
 request concurrency level and enforces a very simple request handletime timeout.
 
 Here is an example of how you can configure the **concurrency limit** on your server. You can say how
-many concurrent request your server can handle at once and how many waiters are allowed. Everything on
-top of that will be *rejected* by a server and hopefully retired by a client talking to our server.
+many concurrent requests your server can handle at once and how many waiters are allowed. Everything on
+top of that will be *rejected* by a server and hopefully retried by a client talking to our server.
 
 
 {% highlight scala %}
@@ -139,7 +139,7 @@ val server = Http.server
 
 Concurrency limit is one of the forms of *admission control* we have for servers. Admission control
 is a technique that employs some kind of feedback controller from the underlying system to determine
-if it's reasonable to handle (for servers) or send (for clients) a given request or it's better to
+whether it's reasonable to handle (for servers) or send (for clients) a given request or it's better to
 reject it. As a canonical example of server-side admission control, we might think of something that
 prevents a server from overwhelming by rejecting some amount of requests. Essentially, instead of
 slowing down 100% of requests we reject, for example, 25% but keep operating normally (and maybe even
@@ -157,7 +157,7 @@ val server = Http.server
   .withRequestTimeout(42.seconds)
 {% endhighlight %}
 
-There is no default value for request timeout and it’s disabled by the same reason concurrency limit
+There is no default value for request timeout and it’s disabled for the same reason concurrency limit
 is disabled. Finagle is trying really hard to not speculate on any application-specific (or even
 protocol-specific) params. You have to be explicit about those.
 
@@ -169,7 +169,7 @@ a request will succeed in the least possible time. This makes them much more com
 The list of features clients do is quite dramatic for being fully covered here in this post, but we
 can surely walk through them and see what kind of problems they solve.
 
-First of all, we need to be able to **retry** failed requests thereby maximize success rate. Retrying
+First of all, we need to be able to **retry** failed requests thereby maximizing success rate. Retrying
 implies a number of quite difficult questions we need to find answers to. How can we say if the request
 is failed? Is that safe to retry this request? If we already tried once and it didn't help, should
 we keep retrying or should we give up? Finagle is taking a good care about all of these and we'll see
@@ -199,7 +199,7 @@ val client = Http.client
 
 Of course, we need to distribute traffic across a number of instances where our software is deployed.
 Finagle comes with a very rich set of **load balancers** and I honestly can’t name another system around
-that provides such advanced load balancing strategies as Finagle do today. We'll cover load balancing
+that provides such advanced load balancing strategies as Finagle does today. We'll cover load balancing
 in details later in this post since it plays a major role in resiliency of Finagle clients.
 
 Besides picking a right replica to send request to, a Finagle client also takes care about managing
@@ -209,12 +209,12 @@ replicas/sessions from a request path.
 Clients are also come with **interrupts** support that is primarily used for **request cancellation**
 and prevents both servers and clients from doing useless work. You might think - "Why would I cancel
 the request? I sent it and I meant it!". The tricky part here is that interrupts happen implicitly.
-Consider the following example. Your client sets a timeout and sends a request a server. After a given
+Consider the following example. Your client sets a timeout and sends a request to a server. After a given
 amount of time a timeout expires and a client interrupts the future associated with a given request.
 What happens next is really depending on client's protocol, but long story short, Finagle will do its
 best in order to propagate that cancellation across service boundaries. Worst case scenario -
 (i.e., HTTP 1.1) it cuts the connection but there is so much more we can do in Mux (and perhaps HTTP/2)
-by sending a control message to a server saying something close to "Hey, I'm no loner interested in
+by sending a control message to a server saying something close to "Hey, I'm no longer interested in
 the result of this request so you should feel free to drop it". 
 
 Quite similarly to propagating interrupts, we might want to also do that for some **request context**
@@ -246,7 +246,7 @@ failures. Second, our load balancers go crazy. They think if a given server resp
 response is a success, it seems like a great deal to send it more traffic while it fact it was failing
 fast.
 
-Since 6.33, we've got [response classifiers][req-rep] that you can plug in into any client and teach
+Since 6.33, we've got [response classifiers][req-rep] that you can plug into any client and teach
 it how to treat responses. For example, here is how you can tell HTTP client see HTTP 503 as a
 non-retriable failure so the circuit breaker will kick in on this response.
 
@@ -283,7 +283,7 @@ library) and represented as `Stream[Duration]`, which means you can easily plug 
 
 Finagle provides an API for building popular backoffs, including [jittered][jitter], which are super
 useful in clusters built around optimistic locking whose individual nodes might perform poorly under
-the hight contention. Our goal is to make sure that clients started at the same time not competing
+the high contention. Our goal is to make sure that clients started at the same time are not competing
 with each other on retries to a single server. To do that we add some randomized factor (or **jitter**)
 into every duration from a backoff policy thereby reducing chances that several clients will be retrying
 simultaneously.
@@ -312,12 +312,12 @@ val client = Http.client
 #### Load Balancers
 
 There are pretty deep-seated assumptions inside of Finagle that service clusters are homogeneous,
-that they are equivalent from the point of view of the application. Those often referenced as a
+that they are equivalent from the point of view of the application. Those are often referenced as a
 **replica set**.
 
-In Finagle, load balancers are consists of two independent components: **load distributor** and
+In Finagle, load balancers consist of two independent components: **load distributor** and
 **load metric**. That said, the load balancing algorithm might be described in terms of those two: we
-distribute load across some subset of nodes/replicas and pick the one for which a load metrics is
+distribute load across some subset of nodes/replicas and pick the one for which a load metric is
 minimal.
 
 In order to better understand the variety of load balancing options available in Finagle today, let's
@@ -337,8 +337,8 @@ access to its min element, but every other operation takes the logarithmic time 
 tricky to implement a different and perhaps more sophisticated load metric on top of the heap without
 sacrificing its performance.
 
-The next step was the **P2C** (power of two choices) load balancer that solved most the heap balancer
-problems. By employing, quite a brilliant idea, the algorithm takes two random nodes from the server
+The next step was the **P2C** (power of two choices) load balancer that solved most of the heap balancer
+problems. By employing quite a brilliant idea, the algorithm takes two random nodes from the server
 set and picks the least loaded one. If we use that strategy repeatedly, we will get a manageable
 upper bound of the maximum load on each node.
 
@@ -362,9 +362,9 @@ the best result there in mitigating latency spikes caused by GC pauses or JVM wa
 While EMWA looks very promising already, there is even more advanced load balancer in Finagle today.
 The **aperture** load balancer is designed to solve the problem of large server sets. Depending on a
 scale, each Finagle client might be talking to several thousands of servers, which will likely
-result in several thousands of opened connections and quite a low concurrency per each node. Why
+result in several thousands of opened connections and quite low concurrency per each node. Why does
 a number of connections matter? It’s waste of resources and it comes with a cost of long tail latency
-because of the high number of connection establishments. Why concurrency matter? To take an advantage
+because of the high number of connection establishments. Why does concurrency matter? To take advantage
 of any load metrics we need some numbers to work with. When concurrency is low our least loaded metrics
 is zero for every server.
 
@@ -399,23 +399,23 @@ val client = Http.client.withLoadBalancer(balancer)
 #### Circuit Breakers
 
 Now we know how load balancers distribute load, the question is how they avoid nodes that are likely
-to fail or already failed? This done by a layer of circuit breakers placed under load balancers so
+to fail or already failed? This is done by a layer of circuit breakers placed under load balancers so
 that when they mark a replica unavailable, it will be avoided by a load balancer.
 
-As for today, there are three circuit breakers in Finagle. 
+As of today, there are three circuit breakers in Finagle. 
 
-- **Fail Fast** - prematurely disables the session, which failed TCP connect.
+- **Fail Fast** - prematurely disables the session that failed TCP connect.
 - **Failure Accrual** - performs liveness detection on a request basis.
 - **Threshold Failure Detector** - a ping-based failure detector that periodically measures RTT latency
-for ping-pong exchange between nodes and if latency doesn't look good, it excludes that session from a
-request path. This is a pretty powerful tool, but it requires the underlying protocol support liveness
+for ping-pong exchange between nodes and if the latency doesn't look good, it excludes that session from a
+request path. This is a pretty powerful tool, but it requires the underlying protocol to support liveness
 detection control signals. For now, we have that implemented for Mux and will likely do that for HTTP/2
 as well.
 
 Failure Accrual is our the most advanced circuit breaker in the way that it supports a pluggable policy
 used to determine when to mark a session unavailable. Today it’s possible to either configure it to
 maintain a required success rate (if that goes below a requested value, a session is marked dead) or
-you can say after how many consecutive failures a session considered unavailable.
+you can say after how many consecutive failures a session is considered unavailable.
 
 By default, it’ll mark a session dead after 5 failures in row and go to a jittered backoff before
 re-enabling that session/or replica again. Although, it's quite easy to override that to be success
