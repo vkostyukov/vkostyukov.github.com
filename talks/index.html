@@ -5,50 +5,45 @@ title: Talks
 
 <body>
   <h5>
-    Finch: Your REST API as a Monad
-    <br/>
-    <span><a href="https://twitter.com/scalaexchange">ScalaX in London</a>, Dec 2015</span>
+    Finagle Under the Hood <br/>
+    <span><a href="http://event.scaladays.org/scaladays-nyc-2016">ScalaDays 2016 in NY</a>, May 2016 | <a href="https://www.youtube.com/watch?v=kfs-dtbG0kY">video</a> <a href="http://vkostyukov.net/slides/finagle-101/">slides</a> <a href="http://vkostyukov.net/posts/finagle-101">transcript</a><span>
   </h5>
-    See full video of the talk at <a href="https://skillsmatter.com/skillscasts/6876-finch-your-rest-api-as-a-monad">the SkillsMatter web site</a>.
+  <p>
+Finagle is an extensible RPC system for JVM written in Scala that is used and developed at Twitter. It promotes a programming model where servers and clients might be viewed as functions, which are both easy to compose and reason about. Although, there is quite a complex logic (connection pooling, load balancing, circuit breaking and so on) hidden behind those functions. In this talk, we'll dig into Finagle internals and carefully walk through each of its modules to see what happens when we a) send a request to a Finagle client b) receive a request by a Finagle server.
+   </p>
   <hr />
 
   <h5>
-    Finch 101
-    <br/>
-    <span><a href="https://twitter.com/FinagleCon/status/608711920716251137">FinagleCon at Twitter HQ</a>, Aug 2015</span>
+    Finch: Your REST API as a Monad <br/>
+    <span><a href="https://twitter.com/scalaexchange">ScalaX in London</a>, Dec 2015 | <a href="https://skillsmatter.com/skillscasts/6876-finch-your-rest-api-as-a-monad">video</a></span>
   </h5>
-    <iframe width="800" height="400" marginwidth="0" marginheight="0" scrolling="no" src="http://vkostyukov.net/slides/finch-101/" frameborder="0" allowfullscreen style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;"></iframe>
+  <p>
+Finch is a purely-functional library for building composable REST APIs on top of Finagle.
+
+It's well known and widely adopted in Finagle that "Your Server as a Function" uses <code>Request => Response</code>. In a REST API setting this function may be viewed as <code>Request =1=> (A =2=> B) =3=> Response</code>, where transformation 1 is request decoding (deserialization), transformation 2 -is business logic and transformation, and transformation 3 is- response encoding (serialization).
+
+The only interesting part here is transformation 2 (i.e., <code>A => B</code>). Since it's usually a challenge to deal with pure functions in real-world problems, we wrap this into a monad <code>M[_]</code>, so that a transformation (i.e, <code>map</code>, <code>flatMap</code>) <code>M[A] => M[B]</code> encodes the business logic of a REST API server.
+
+This and other ideas are implemented in Finch, a purely-functional library for building composable REST APIs on top of Finagle.
+  <p>
   <hr />
 
   <h5>
-    Finch: 0.1 to 1.0
-    <br/>
-    <span><a href="http://www.meetup.com/SF-Scala">SFScala at Twitter HQ</a>, Apr 2015</span>
+    Purely Functional Data Structures in Scala <br/>
+    <span><a href="http://www.meetup.com/ScalaNsk/">@ScalaNSK</a>, Sep 2013 | <a href="https://www.youtube.com/embed/fWnaW3CP7OI">video</a> <a href="http://www.slideshare.net/vkostyukov/purely-functional-data-structures-in-scala-26175521">slides</a></span>
   </h5>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/bbzRTxGDFhs" frameborder="0" allowfullscreen></iframe>
+  <p>
+    An overview of the ideas and tricks used to implement classic data structures in a purely functional setting. See <a href="https://github.com/vkostyukov/scalacaster">Scalacaster</a> project for the source code snippets.
+
+  </p>
   <hr />
 
+  <h5>Archive (outdated talks)</h5>
+    <ul>
+      <li>Finch 101 @ <a href="https://twitter.com/FinagleCon/status/608711920716251137">FinagleCon at Twitter HQ</a>, Aug 2015 | <a href="http://vkostyukov.net/slides/finch-101/">slides</a></li>
+      <li>Finch: 0.1 to 1.0 @ <a href="http://www.meetup.com/SF-Scala">SFScala at Twitter HQ</a>, Apr 2015 | | <a href="https://www.youtube.com/embed/bbzRTxGDFhs">video</a> <a href="http://vkostyukov.net/slides/finch-01-to-10/">slides</a></li>
+      <li> Finch + Finagle OAuth2 @ <a href="https://twitter.com/finagle/status/534908233068990464">Finagle Meetup in Twitter HQ</a>, Nov 2014 | <a href="www.slideshare.net/slideshow/embed_code/key/2hUGejET3ddtSf">slides</a></li>
+      <li>Finagle and Finch: Async Microservices @ <a href="http://www.meetup.com/ScalaNsk/">@ScalaNSK</a>, Aug 2014 | <a href="https://www.youtube.com/embed/Bh2z6CVdaek">video</a> <a href="http://www.slideshare.net/vkostyukov/async-microservices-with-twitters-finagle">slides</a></ul>
+    </ul>
   <h5>
-    Finch + Finagle OAuth2
-    <br/>
-    <span><a href="https://twitter.com/finagle/status/534908233068990464">Finagle Meetup in Twitter HQ</a>, Nov 2014</span>
-  </h5>
-    <iframe src="//www.slideshare.net/slideshow/embed_code/key/2hUGejET3ddtSf" width="800" height="400" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen></iframe> 
-  <hr />
-
-  <h5>
-    Finch and Finch: Async Microservices
-    <br/>
-    <span><a href="http://www.meetup.com/ScalaNsk/">@ScalaNSK</a>, Aug 2014</span>
-  </h5>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/Bh2z6CVdaek" frameborder="0" allowfullscreen></iframe>
-  <hr />
-
-  <h5>
-    Purely Functional Data Structures in Scala
-    <br/>
-    <span><a href="http://www.meetup.com/ScalaNsk/">@ScalaNSK</a>, Sep 2013</span>
-  </h5>
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/fWnaW3CP7OI" frameborder="0" allowfullscreen></iframe>
-  <hr />
 </body>
