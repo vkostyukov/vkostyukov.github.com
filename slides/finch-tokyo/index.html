@@ -1,0 +1,725 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>Finch: Put Some Types on HTTP</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=792, user-scalable=no">
+	<link rel="stylesheet" href="shower/themes/bright/styles/screen.css">
+	<link rel="stylesheet" href="highlight/styles/default.css">
+	<style>
+		code {
+			font-size: 18px;
+		}
+		.slide p.note {
+			font-size: 18px;
+		}
+		.slide:after {
+			display: none;
+			bottom: 60px;
+		}
+		.slide p.subtitles {
+			position: absolute;
+			width: 100%;
+			background-color: black;
+			color: #fff;
+			left: 0px;
+			bottom: -40px;
+			font-size: 36px;
+			line-height: 1em;
+		}
+		.slide.shout h2 {
+			font-size: 60px;
+		}
+		.slide pre mark.red {
+			background: #FFA1A1;
+		}
+		.slide pre code {
+			line-height: 133%;
+		}
+		.coding-time h2 {
+			font-family: "Open Sans", sans-serif;
+			color: #FFF;
+			font-size: 46px;
+			font-weight: bold;
+		}
+		</style>
+	</style>
+</head>
+<body class="full">
+	<section class="slide cover" id="Cover"><div>
+		<header>
+			<p>
+				Put <br />
+				<code>Some[Types]</code> <br />
+				on your <br />
+				<b>HTTP</b> endpoints
+			</p>
+		</header>
+		<img src="pictures/finch-logo.png"/>
+		<style>
+			#Cover code {
+				font-size:32px;
+			}
+			#Cover img {
+				margin-left: 150px;
+				position: absolute;
+				top: 150px;
+				width: 300px;
+			}
+			#Cover.slide {
+				background: #FFF;
+			}
+			#Cover header {
+				position: absolute;
+				left: 500px;
+				top: 120px;
+			}
+			#Cover h2 {
+				font-family: "Open Sans", sans-serif;
+				margin:6px 0 0;
+				color:#444;
+				font-size:96px;
+				}
+			#Cover p {
+				text-align: center;
+				margin:6px 0 0;
+				color:#444;
+				font-size:42px;
+				}
+			#Cover p a {
+				color:#5099FF;
+				font-size:28px;
+				}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Why Care?</h2>
+		<ul>
+			<li class="next">TCP <strong>doesn't care</strong> about types</li>
+			<li class="next">HTTP <strong>doesn't care</strong> about types</li>
+			<li class="next">Your compiler <strong>cares</strong> about types</li>
+			<li class="next">You <strong>should care</strong> about types</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Typed HTTP?</h2>
+		<ul>
+			<li class="next">Maybe <code>HttpRequest</code>, <code>HttpResponse</code>?</li>
+			<li class="next">What about <code>HttpEntity</code>, <code>HttpHeader</code>, <code>HttpParam</code>, ...?</li>
+			<li class="next">Perhaps <code>String</code>?</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+	<section class="slide" id="a"><div>
+		<p><code>[A]</code></p>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#a code {
+				position: absolute;
+				left: 460px;
+				top: 280px;
+				font-size:48px;
+			}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide" id="endpointa"><div>
+		<p><code><strong>Endpoint</strong>[A]</code></p>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#endpointa code {
+				position: absolute;
+				left: 350px;
+				top: 280px;
+				font-size:48px;
+			}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Finch: HTTP Combinators</h2>
+		<ul>
+			<li class="next">Around <a href="https://groups.google.com/forum/#!topic/finaglers/HRsfl4st8IQ">since 2014</a></li>
+			<li class="next">Used in production by 20+ business (eg: Redbubble and Mesosphere)</li>
+			<li class="next">Reasonably fast (<a href="https://www.techempower.com/benchmarks/#section=data-r13&hw=ph&test=json&l=4ftbsv">according to TechEmpower</a>)</li>
+			<li class="next">Built with <strong>Finagle</strong>, Cats, Circe, Shapeless</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+		<section class="slide" id="understandinge"><div>
+		<p class="centered">
+			<code>Endpoint[<strong>HttpRequest</strong>]</code> <br />
+			<span class="next">⇩ <br/>
+				<code>Endpoint[A]</code> <br />
+			</span>
+			<span class="next">⇩ <br/>
+				<code>Endpoint[B]</code> <br />
+			</span>
+			<span class="next">⇩ <br/>
+				<code>Endpoint[<strong>HttpResponse</strong>]</code> <br />
+			</span>
+			<img src="pictures/circle.png" class="next" width="75%" />
+		</snap>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#understandinge p.centered {
+				text-align: center;
+				margin-top: 30px;
+			}
+			#understandinge code {
+				font-size: 32px;
+			}
+			#understandinge img {
+				position: absolute;
+				top: 10px;
+				left: 175px;
+			}
+		</style>
+	</div></section>
+
+
+	<section class="slide" id="aboutfinch"><div>
+		<h2 class="place">Finch <i>takes care</i> about <br />decoding <code>HttpRequest => A</code> and encoding <code>B => HttpResponse</code> <br />so you only worry about <strong>business logic</strong> <code>A => B</code></h2>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#aboutfinch h2 {
+				width: 90%;
+				text-align: center;
+				font-size: 28px;
+				line-height: 2.0em;
+			}
+			#aboutfinch code {
+				font-size: 28px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Understanding Endpoints</h2>
+		<ul>
+			<li class="next">Endpoint is a <b>functor</b> so there is <code>map</code></li>
+			<li class="next">Endpoint is an <b>applicative</b> so there is product <code>::</code> and coproduct <code>:+:</code></li>
+			<li class="next">Endpoint embeds <b>state</b> that runs on <code>Input</code> and produces <code>Future[Output[A]]</code>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+		<section class="slide" id="wrk"><div>
+			<h2><center>Finagle vs. Finch</center></h2>
+<pre><code class="scala" id="finagle">new Service[Request, Response] {
+ def apply(req: Request): Future[Response] =
+  if (<mark>req.method != Method.Post</mark>)
+   Future.value(Response(req.version, Status.NotFound))
+  else {
+   val payloadIn =
+    <mark>mapper.readValue(req.contentString, classOf[Payload])</mark>
+   val payloadOut =
+    <mark>mapper.writeValueAsBytes(payloadIn)</mark>
+
+   val rep = Response(req.version, Status.Ok)
+   rep.content =  Buf.ByteArray.Owned(payloadOut)
+   rep.contentType = "application/json"
+
+   Future.value(rep)
+ }
+}</code></pre>
+<pre><code class="scala" id="finch"><mark class="next">post(jsonBody[Payload])</mark></code></pre>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#wrk #finagle {
+				position: absolute;
+				left: 30px;
+				padding-right: 10px;
+				border-right: 1px solid #444;
+			}
+			#wrk #finch {
+				position: absolute;
+				top: 360px;
+				left: 700px;
+			}
+			#wrk #finagle {
+				font-size: 16px;
+			}
+		</style>
+</div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2>Finch Overhead</h2>
+		<img src="pictures/framework-overhead.png" class="place c" width="75%" />
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+    <section class="slide"><div>
+		<h2>Why <strong>Only 10%</strong>?</h2>
+		<ul>
+			<li class="next">Compile time machinery isn't free but very cheap</li>
+			<li class="next">Circe is <a href="https://github.com/circe/circe-benchmarks">fast as hell</a></li>
+			<li class="next">Finagle/Netty/Circe-specific optimizations</li>
+			<li class="next">Reasonably lightweight abstractions</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Why <strong>As Many As 10%</strong>?</h2>
+		<ul>
+			<li class="next">Composition comes with a cost: allocations</li>
+			<li class="next">JVM doesn't like allocations (longer and more frequent GC pauses)</li>
+			<li class="next">Idiomatic Scala code <strong>allocates a lot</strong></li>
+			<li class="next">Purely Functional Scala code <strong>allocates a #!@#!%</strong></li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2 class="place" style="width:90%;text-align: center;">Fast Scala code looks <b>less like Scala</b></h2>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<p style="margin-top: 100px;">
+<blockquote align="center" class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">My new pet peeve: &quot;how to make X faster: do less of X&quot; recommendations.</p>&mdash; Gil Tene (@giltene) <a href="https://twitter.com/giltene/status/818258334327382017">January 9, 2017</a></blockquote>
+<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+		</p>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+	<section class="slide"><div>
+		<h2 class="place" style="width:90%;text-align:center;font-size:32px;">
+			<b>Example 1</b><br /> <br />
+			How to make <b>composition</b> faster? Compose less.
+		</h2>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+	<section class="slide" id="endpointresult"><div>
+		<h2>Modelling Endpoint Result</h2>
+<pre><code class="scala">type EndpointResult[A] = Option[(Input, Future[Output[A]])]</pre></code><h3>vs</h3>
+<br />
+<pre><code class="scala">sealed abstract class EndpointResult[+A]
+case object Skipped extends EndpointResult[Nothing]
+case object Matched[A](
+  rem: Input, out: Future[Output[A]]) extends EndpoinResult[A]
+</pre></code>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#endpointresult h3 {
+				position: relative;
+				font-size: 30px;
+				z-index: 1;
+				overflow: hidden;
+				text-align: center;
+			}
+			#endpointresult h3:before, #endpointresult h3:after {
+				position: absolute;
+				top: 51%;
+				overflow: hidden;
+				width: 50%;
+				height: 1px;
+				content: '\a0';
+				background-color: #444;
+			}
+			#endpointresult h3:before {
+				margin-left: -50%;
+				text-align: right;
+			}
+			#endpointresult code {
+				font-size: 18px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+
+	<section class="slide" id="perf1"><div>
+		<h2>Benchmarking Endpoint Results</h2>
+<pre><code>
+-------------------------------------------------------------------------------------
+TA: Type Alias | ADT: sealed abstract class | Running Time Mode
+-------------------------------------------------------------------------------------
+MapBenchmark.mapAsyncTA                             avgt    429.113 ±   43.297  ns/op
+MapBenchmark.mapAsyncADT                            avgt    407.126 ±   12.807  ns/op
+MapBenchmark.mapOutputAsyncTA                       avgt    821.786 ±   52.045  ns/op
+MapBenchmark.mapOutputAsyncADT                      avgt    777.654 ±   26.444  ns/op
+
+MapBenchmark.mapAsyncTA:·gc.alloc.rate.norm         avgt    776.000 ±    0.001   B/op
+MapBenchmark.mapAsyncADT:·gc.alloc.rate.norm        avgt    720.000 ±    0.001   B/op
+MapBenchmark.mapOutputAsyncTA:·gc.alloc.rate.norm   avgt   1376.001 ±    0.001   B/op
+MapBenchmark.mapOutputAsyncADT:·gc.alloc.rate.norm  avgt   1320.001 ±    0.001   B/op
+</code></pre>
+		<p class="note">
+			See <a href="https://github.com/finagle/finch/blob/master/benchmarks/src/main/scala/io/finch/benchmarks.scala#L116">MapBenchmark</a> and <a href="https://github.com/finagle/finch/pull/707">#707</a>.
+		</p>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#perf1 code {
+				font-size: 15px;
+			}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Example 1: Takeaways</h2>
+		<ul>
+			<li class="next">Better performance is a good reason to introduce a new type</li>
+			<li class="next">Performance-critical abstractions should not engage composition</li>
+			<li class="next">Bytes matter! (but check JMH)</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+	<section class="slide"><div>
+		<h2 class="place" style="width:90%;text-align:center;font-size:32px;">
+			<b>Example 2</b><br /> <br />
+			How to make <b>codecs</b> faster? Encode/decode less.
+		</h2>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+	<section class="slide" id="decoding"><div>
+		<h2>HTTP Payload Decoding</h2>
+		<img src="pictures/decoding-1.png"/>
+		<p class="note next">
+			For UTF-8 we need at least 1 character per byte and each <code>char</code> on JVM is <b>2 bytes</b>.
+		</p>
+		<img src="pictures/decoding-2.png" class="next"/>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#decoding img {
+				position: absolute;
+				height: 100%;
+				top: 60px;
+			}
+			#decoding p.note {
+				position: absolute;
+				top: 500px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+
+	<section class="slide"><div>
+		<h2>Parsing JSON from Bytes</h2>
+		<ul>
+			<li class="next">Most of the modern JSON libraries can do that!</li>
+			<li class="next">Jawn (think of Circe and Argonaut) can do that!
+			<li class="next">One caveat: the target charset should always be UTF-8</li>
+			<li class="next">Supported since Finch 0.11 (see <a href="https://github.com/finagle/finch/pull/671">#671</a>)</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Parsing with Circe</h2>
+<pre><code class="scala">implicit def fromCirce[A: Decoder]: Decode.Json[A] =
+  Decode.json { (b, cs) =>
+    val attemptJson = cs match {
+      case StandardCharsets.UTF_8 => <mark>decodeByteBuffer</mark>[A](b.asByteBuffer)
+      case _ => <mark>decode</mark>[A](BufText.extract(b, cs))
+    }
+
+    attemptJson.fold[Try[A]](Throw.apply, Return.apply)
+  }
+
+</code></pre>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+	<section class="slide" id="perf2"><div>
+		<h2>Benchmarking Decoding (w/ Circe)</h2>
+<pre><code>
+---------------------------------------------------------------------------------
+S: parse string | BA: parse byte array | Running Time Mode
+---------------------------------------------------------------------------------
+JsonBenchmark.decodeS                         avgt   5950.402 ±  464.246   ns/op
+JsonBenchmark.decodeBA                        avgt   3232.696 ±  171.160   ns/op
+
+JsonBenchmark.decodeS:·gc.alloc.rate.norm     avgt   7992.005 ±   12.749    B/op
+JsonBenchmark.decodeBA:·gc.alloc.rate.norm    avgt   4908.003 ±    6.374    B/op
+</code></pre>
+		<p class="note">
+			See <a href="https://github.com/finagle/finch/blob/master/benchmarks/src/main/scala/io/finch/benchmarks.scala#L138">JsonBenchmark</a>.
+		</p>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#perf2 code {
+				font-size: 16px;
+			}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide" id="encoding"><div>
+		<h2>HTTP Payload Encoding</h2>
+		<img src="pictures/encoding-1.png"/>
+		<p class="note next">Each UTF-8 character on JVM produces up to <b>3 bytes</b>. See <code>UTF_8.newEncoder.maxBytesPerChar</code></p>
+		<img src="pictures/encoding-2.png" class="next"/>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+		#encoding img {
+			position: absolute;
+			height: 100%;
+			top: 60px;
+		}
+		#encoding p.note {
+			position: absolute;
+			top: 500px;
+		}
+		</style>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Printing JSON to Bytes</h2>
+		<ul>
+			<li class="next">Not so common as parsing from bytes</li>
+			<li class="next">Implemented in Circe 0.7 (see <a href"https://github.com/circe/circe/pull/537">#537</a>) and Circe-Jackson 0.7 (see <a href="https://github.com/circe/circe-jackson/pull/11">#11</a>) for UTF-8 printing</li>
+			<li class="next">Supported since Finch 0.12 (see <a href="https://github.com/finagle/finch/pull/717">#717</a>) for Circe, Circe-Jackson</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+	<section class="slide"><div>
+		<h2>Printing with Circe</h2>
+<pre><code class="scala">implicit def fromCirce[A](implicit e: Encoder[A]): Encode.Json[A] =
+  Encode.json {
+    case (a, StandardCharsets.UTF_8) =>
+      Buf.ByteBuffer.Owned(<mark>printBytes</mark>(e(a)))
+    case (a, cs) =>
+      BufText(<mark>printString</mark>(e(a)), cs)
+  }
+</code></pre>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+	<section class="slide" id="perf3"><div>
+		<h2>Benchmarking Encoding (w/ Circe)</h2>
+<pre><code>
+---------------------------------------------------------------------------------
+S: print string | BA: print byte array | Running Time Mode
+---------------------------------------------------------------------------------
+JsonBenchmark.encodeS                         avgt   16400.327 ±  621.935  ns/op
+JsonBenchmark.encodeBA                        avgt   12645.070 ±  391.591  ns/op
+
+JsonBenchmark.encodeS:·gc.alloc.rate.norm     avgt   46900.015 ±  19.123   B/op
+JsonBenchmark.encodeBA:·gc.alloc.rate.norm    avgt   30360.011 ±   0.001   B/op
+</code></pre>
+		<p class="note">
+			See <a href="https://github.com/finagle/finch/blob/master/benchmarks/src/main/scala/io/finch/benchmarks.scala#L138">JsonBenchmark</a>.
+		</p>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+		<style>
+			#perf3 code {
+				font-size: 16px;
+			}
+		</style>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Example 2: Takeaways</h2>
+		<ul>
+			<li class="next"><code>new String(bytes, "UTF-8")</code> allocates <b>2 * bytes.length</b> bytes</li>
+			<li class="next"><code>String.getBytes("UTF-8")</code> allocates <b>3 * string.size</b> bytes</li>
+			<li class="next">Micro-optimizations are great but try looking at the problem end-to-end to see what could be done <i>less</i></li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+
+	<section class="slide"><div>
+		<h2 class="place" style="width:90%;text-align:center;">Try <b>string-less codecs</b> with Finch 0.12!</h2>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+
+	<section class="slide"><div>
+		<h2>Performance Lessons Learned</h2>
+		<ul>
+			<li class="next">Performance-wise, Scala code is hard to reason about (use <strong>JMH</strong>)</li>
+			<li class="next">Pay attention to the allocation profile</li>
+			<li class="next">Learn how to allocate less doing <i>X</i> (every byte counts)</li>
+			<li class="next">Do less of <i>X</i></li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+	<section class="slide"><div>
+		<h2>Roadmap to <strong>1.0</strong></h2>
+		<ul>
+			<li class="next">Netty 4 (better performance, HTTP/2)</li>
+			<li class="next">First-class streaming support (fs2, iteratees)</li>
+			<li class="next">Swagger (our oldest <a href="https://github.com/finagle/finch/issues/73">opened ticket
+			</a>)</li>
+			<li class="next">Compile-time content type negotiation</li>
+			<li class="next">Reduce the performance gap with Finagle to 5%</li>
+		</ul>
+		<p class="subtitles">
+			TODO: subtitles
+		</p>
+	</div></section>
+
+
+
+
+
+	<section class="slide shout" id="Bye2"><div>
+		<h2><a href="https://github.com/twitter/finagle">https://github.com/finagle/finch</a></h2>
+		<style>
+		  #Bye2 h2 {
+		   left: 80px;
+		  }
+		</style>
+	</div></section>
+
+
+	<div class="progress"><div></div></div>
+	<script src="shower/shower.min.js"></script>
+	<script src="highlight/highlight.pack.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-61641022-1', 'auto');
+ga('send', 'pageview');
+	</script>
+	<!-- Copyright © 2014 Yours Truly, Famous Inc. -->
+	<!-- Photos by John Carey, fiftyfootshadows.net -->
+</body>
+</html>
