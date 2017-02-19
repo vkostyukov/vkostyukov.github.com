@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
-	<title>Finch: Put Some Types on HTTP</title>
+	<title>Finch: HTTP エンドポイントに型を持たせよう</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=792, user-scalable=no">
 	<link rel="stylesheet" href="shower/themes/bright/styles/screen.css">
@@ -104,7 +104,8 @@
 			<li class="next">You <strong>should care</strong> about types</li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			型を気に掛けてくれるのは TCP や HTTP ではなくコンパイラ<br>
+			あなたも気に掛けるべき
 		</p>
 	</div></section>
 
@@ -117,18 +118,12 @@
 			<li class="next">What about <code>HttpEntity</code>, <code>HttpHeader</code>, <code>HttpParam</code>, ...?</li>
 			<li class="next">Perhaps <code>String</code>?</li>
 		</ul>
-		<p class="subtitles">
-			TODO: subtitles
-		</p>
 	</div></section>
 
 
 
 	<section class="slide" id="a"><div>
 		<p><code>[A]</code></p>
-		<p class="subtitles">
-			TODO: subtitles
-		</p>
 		<style>
 			#a code {
 				position: absolute;
@@ -143,9 +138,6 @@
 
 	<section class="slide" id="endpointa"><div>
 		<p><code><strong>Endpoint</strong>[A]</code></p>
-		<p class="subtitles">
-			TODO: subtitles
-		</p>
 		<style>
 			#endpointa code {
 				position: absolute;
@@ -167,7 +159,8 @@
 			<li class="next">Built with <strong>Finagle</strong>, Cats, Circe, Shapeless</li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			Finch は Finagle 等を使って開発した高速な HTTP コンビネータ<br>
+			20 以上のビジネスで本番運用されている
 		</p>
 	</div></section>
 
@@ -188,7 +181,7 @@
 			<img src="pictures/circle.png" class="next" width="75%" />
 		</snap>
 		<p class="subtitles">
-			TODO: subtitles
+			Endpoint[_] にビジネスロジックを書く
 		</p>
 		<style>
 			#understandinge p.centered {
@@ -210,7 +203,8 @@
 	<section class="slide" id="aboutfinch"><div>
 		<h2 class="place">Finch <i>takes care</i> about <br />decoding <code>HttpRequest => A</code> and encoding <code>B => HttpResponse</code> <br />so you only worry about <strong>business logic</strong> <code>A => B</code></h2>
 		<p class="subtitles">
-			TODO: subtitles
+			Finch が HTTP の処理をやってくれるので<br>
+			利用者はビジネスロジックに集中できる
 		</p>
 		<style>
 			#aboutfinch h2 {
@@ -236,7 +230,7 @@
 			<li class="next">Endpoint embeds <b>state</b> that runs on <code>Input</code> and produces <code>Future[Output[A]]</code>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			Endpoint は functor と applicative であり、中に state を持つ
 		</p>
 	</div></section>
 
@@ -264,7 +258,7 @@
 }</code></pre>
 <pre><code class="scala" id="finch"><mark class="next">post(jsonBody[Payload])</mark></code></pre>
 		<p class="subtitles">
-			TODO: subtitles
+			Finagle と Finch の比較
 		</p>
 		<style>
 			#wrk #finagle {
@@ -291,7 +285,7 @@
 		<h2>Finch Overhead</h2>
 		<img src="pictures/framework-overhead.png" class="place c" width="75%" />
 		<p class="subtitles">
-			TODO: subtitles
+			Finagle に対する Finch のオーバヘッド
 		</p>
 	</div></section>
 
@@ -307,7 +301,7 @@
 			<li class="next">Reasonably lightweight abstractions</li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			たった 10%? コンパイル時の処理は非常に軽い
 		</p>
 	</div></section>
 
@@ -322,7 +316,7 @@
 			<li class="next">Purely Functional Scala code <strong>allocates a #!@#!%</strong></li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			10% も? 合成はメモリ確保のコストがかかる
 		</p>
 	</div></section>
 
@@ -331,7 +325,7 @@
 	<section class="slide"><div>
 		<h2 class="place" style="width:90%;text-align: center;">Fast Scala code looks <b>less like Scala</b></h2>
 		<p class="subtitles">
-			TODO: subtitles
+			高速な Scala のコードは Scala っぽくない
 		</p>
 	</div></section>
 
@@ -344,7 +338,7 @@
 <script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 		</p>
 		<p class="subtitles">
-			TODO: subtitles
+			「X をより早くするには X を減らせ」
 		</p>
 	</div></section>
 
@@ -355,7 +349,7 @@
 			How to make <b>composition</b> faster? Compose less.
 		</h2>
 		<p class="subtitles">
-			TODO: subtitles
+			例 1: 合成を早くするには？ 合成を減らせ
 		</p>
 	</div></section>
 
@@ -363,7 +357,7 @@
 
 
 	<section class="slide" id="endpointresult"><div>
-		<h2>Modelling Endpoint Result</h2>
+		<h2>Modeling Endpoint Result</h2>
 <pre><code class="scala">type EndpointResult[A] = Option[(Input, Future[Output[A]])]</pre></code><h3>vs</h3>
 <br />
 <pre><code class="scala">sealed abstract class EndpointResult[+A]
@@ -372,7 +366,7 @@ case object Matched[A](
   rem: Input, out: Future[Output[A]]) extends EndpoinResult[A]
 </pre></code>
 		<p class="subtitles">
-			TODO: subtitles
+			エンドポイントの結果をモデル化する
 		</p>
 		<style>
 			#endpointresult h3 {
@@ -425,7 +419,7 @@ MapBenchmark.mapOutputAsyncADT:·gc.alloc.rate.norm  avgt   1320.001 ±    0.001
 			See <a href="https://github.com/finagle/finch/blob/master/benchmarks/src/main/scala/io/finch/benchmarks.scala#L116">MapBenchmark</a> and <a href="https://github.com/finagle/finch/pull/707">#707</a>.
 		</p>
 		<p class="subtitles">
-			TODO: subtitles
+			ベンチマーク結果
 		</p>
 		<style>
 			#perf1 code {
@@ -444,7 +438,8 @@ MapBenchmark.mapOutputAsyncADT:·gc.alloc.rate.norm  avgt   1320.001 ±    0.001
 			<li class="next">Bytes matter! (but check JMH)</li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			まとめ: 性能のためには新しい型を導入する<br>
+			カリカリな局面で使う抽象データでは型合成を避ける
 		</p>
 	</div></section>
 
@@ -455,7 +450,7 @@ MapBenchmark.mapOutputAsyncADT:·gc.alloc.rate.norm  avgt   1320.001 ±    0.001
 			How to make <b>codecs</b> faster? Encode/decode less.
 		</h2>
 		<p class="subtitles">
-			TODO: subtitles
+			例 2: コーデックを早くするには？ エンコード・デコードを減らせ
 		</p>
 	</div></section>
 
@@ -469,7 +464,7 @@ MapBenchmark.mapOutputAsyncADT:·gc.alloc.rate.norm  avgt   1320.001 ±    0.001
 		</p>
 		<img src="pictures/decoding-2.png" class="next"/>
 		<p class="subtitles">
-			TODO: subtitles
+			UTF-8 の 1 文字は JVM 上では 2 バイトになる
 		</p>
 		<style>
 			#decoding img {
@@ -497,7 +492,8 @@ MapBenchmark.mapOutputAsyncADT:·gc.alloc.rate.norm  avgt   1320.001 ±    0.001
 			<li class="next">Supported since Finch 0.11 (see <a href="https://github.com/finagle/finch/pull/671">#671</a>)</li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			多くの JSON ライブラリはバイト列から JSON をパースできる<br>
+			Finch は 0.11 からサポート
 		</p>
 	</div></section>
 
@@ -517,7 +513,7 @@ MapBenchmark.mapOutputAsyncADT:·gc.alloc.rate.norm  avgt   1320.001 ±    0.001
 
 </code></pre>
 		<p class="subtitles">
-			TODO: subtitles
+			Circe を使ったバイト列から JSON へのパース
 		</p>
 	</div></section>
 
@@ -540,7 +536,7 @@ JsonBenchmark.decodeBA:·gc.alloc.rate.norm    avgt   4908.003 ±    6.374    B/
 			See <a href="https://github.com/finagle/finch/blob/master/benchmarks/src/main/scala/io/finch/benchmarks.scala#L138">JsonBenchmark</a>.
 		</p>
 		<p class="subtitles">
-			TODO: subtitles
+			デコードのベンチマーク
 		</p>
 		<style>
 			#perf2 code {
@@ -557,7 +553,8 @@ JsonBenchmark.decodeBA:·gc.alloc.rate.norm    avgt   4908.003 ±    6.374    B/
 		<p class="note next">Each UTF-8 character on JVM produces up to <b>3 bytes</b>. See <code>UTF_8.newEncoder.maxBytesPerChar</code></p>
 		<img src="pictures/encoding-2.png" class="next"/>
 		<p class="subtitles">
-			TODO: subtitles
+			JVM 上の UTF-8 文字をエンコードすると最大で 3 バイトになる<br>
+			UTF_8.newEncoder.maxBytesPerChar を参照
 		</p>
 		<style>
 		#encoding img {
@@ -582,7 +579,7 @@ JsonBenchmark.decodeBA:·gc.alloc.rate.norm    avgt   4908.003 ±    6.374    B/
 			<li class="next">Supported since Finch 0.12 (see <a href="https://github.com/finagle/finch/pull/717">#717</a>) for Circe, Circe-Jackson</li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			Finch では 0.12 より JSON からのバイト列出力をサポート
 		</p>
 	</div></section>
 
@@ -599,7 +596,7 @@ JsonBenchmark.decodeBA:·gc.alloc.rate.norm    avgt   4908.003 ±    6.374    B/
   }
 </code></pre>
 		<p class="subtitles">
-			TODO: subtitles
+			Circe を使った JSON のバイト列出力
 		</p>
 	</div></section>
 
@@ -622,7 +619,7 @@ JsonBenchmark.encodeBA:·gc.alloc.rate.norm    avgt   30360.011 ±   0.001   B/o
 			See <a href="https://github.com/finagle/finch/blob/master/benchmarks/src/main/scala/io/finch/benchmarks.scala#L138">JsonBenchmark</a>.
 		</p>
 		<p class="subtitles">
-			TODO: subtitles
+			エンコードのベンチマーク
 		</p>
 		<style>
 			#perf3 code {
@@ -642,7 +639,7 @@ JsonBenchmark.encodeBA:·gc.alloc.rate.norm    avgt   30360.011 ±   0.001   B/o
 			<li class="next">Micro-optimizations are great but try looking at the problem end-to-end to see what could be done <i>less</i></li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			まとめ: マイクロな最適化も良いけど、問題を端から端まで見て何を減らせるか考えよう
 		</p>
 	</div></section>
 
@@ -653,7 +650,7 @@ JsonBenchmark.encodeBA:·gc.alloc.rate.norm    avgt   30360.011 ±   0.001   B/o
 	<section class="slide"><div>
 		<h2 class="place" style="width:90%;text-align:center;">Try <b>string-less codecs</b> with Finch 0.12!</h2>
 		<p class="subtitles">
-			TODO: subtitles
+			Finch 0.12 の文字列レスのコーデックを試してみてください！
 		</p>
 	</div></section>
 
@@ -670,7 +667,8 @@ JsonBenchmark.encodeBA:·gc.alloc.rate.norm    avgt   30360.011 ±   0.001   B/o
 			<li class="next">Do less of <i>X</i></li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			性能を推測せずに、JMH で計測する<br>
+			メモリ確保を減らす方法を学ぶ
 		</p>
 	</div></section>
 
@@ -688,7 +686,8 @@ JsonBenchmark.encodeBA:·gc.alloc.rate.norm    avgt   30360.011 ±   0.001   B/o
 			<li class="next">Reduce the performance gap with Finagle to 5%</li>
 		</ul>
 		<p class="subtitles">
-			TODO: subtitles
+			1.0 ロードマップ: Netty 4、ストリーム、Swagger への対応など<br>
+			Finagle との性能差を 5% に縮める
 		</p>
 	</div></section>
 
