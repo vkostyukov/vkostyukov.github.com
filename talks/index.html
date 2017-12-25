@@ -5,21 +5,31 @@ title: Talks
 
 <body>
   <h5>
+    Futures: Twitter vs. Scala <br/>
+    <span><a href="http://scale.bythebay.io/">Scale By the Bay 2017 in San Francisco</a>, Nov 2017 | <a href="https://www.youtube.com/watch?v=jiYe-LdPrS0">video</a> <a href="http://kostyukov.net/slides/futures/">slides</a><span>
+  </h5>
+  <p>
+It's been enough of confusion around Twitter Futures. Let's clear the air and talk frankly about historic and technical reasons they exist. We'll see how the difference in the API, behavior, and performance not only makes Twitter Futures competitive with Scala Futures but also the obvious choice for IO systems with the corresponding degree of throughput requirements (i.e., Finagle).
+  </p>
+  <hr />
+
+
+  <h5>
     Finch: Put Some Types on Your HTTP Endpoints <br/>
-    <span><a href="2017.scalamatsuri.org/en/">ScalaMatsuri 2017 in Tokyo</a>, Feb 2017 | <a href="https://www.youtube.com/watch?v=DlEG4VlpZFg">video</a> <a href="vkostyukov.net/slides/finch-tokyo/">slides</a> <a href="vkostyukov.net/posts/finch-performance-lessons/">transcript</a><span>
+    <span><a href="2017.scalamatsuri.org/en/">ScalaMatsuri 2017 in Tokyo</a>, Feb 2017 | <a href="https://www.youtube.com/watch?v=DlEG4VlpZFg">video</a> <a href="http://kostyukov.net/slides/finch-tokyo/">slides</a> <a href="http://kostyukov.net/posts/finch-performance-lessons/">transcript</a><span>
   </h5>
   <p>
 Finch (a Scala combinator library for building HTTP endpoints) is rapidly approaching 1.0 and while its design keeps evolving, the core principles are still the same as in 0.1. In this talk, we’ll walk through Finch’s only abstraction, an Endpoint, and discuss why building an HTTP API in terms of functional combinators is a reasonable idea that promotes an insane level of reusability. We’ll see that functional abstractions and APIs don’t necessary trade off performance, but could easily be orthogonal to it.
-   </p>
+  </p>
   <hr />
 
   <h5>
     Finagle Under the Hood <br/>
-    <span><a href="http://event.scaladays.org/scaladays-nyc-2016">ScalaDays 2016 in NY</a>, May 2016 | <a href="https://www.youtube.com/watch?v=kfs-dtbG0kY">video</a> <a href="http://vkostyukov.net/slides/finagle-101/">slides</a> <a href="http://vkostyukov.net/posts/finagle-101">transcript</a><span>
+    <span><a href="http://event.scaladays.org/scaladays-nyc-2016">ScalaDays 2016 in NY</a>, May 2016 | <a href="https://www.youtube.com/watch?v=kfs-dtbG0kY">video</a> <a href="http://kostyukov.net/slides/finagle-101/">slides</a> <a href="http://kostyukov.net/posts/finagle-101">transcript</a><span>
   </h5>
   <p>
 Finagle is an extensible RPC system for JVM written in Scala that is used and developed at Twitter. It promotes a programming model where servers and clients might be viewed as functions, which are both easy to compose and reason about. Although, there is quite a complex logic (connection pooling, load balancing, circuit breaking and so on) hidden behind those functions. In this talk, we'll dig into Finagle internals and carefully walk through each of its modules to see what happens when we a) send a request to a Finagle client b) receive a request by a Finagle server.
-   </p>
+  </p>
   <hr />
 
   <h5>
