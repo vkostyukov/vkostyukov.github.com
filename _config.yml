@@ -1,5 +1,5 @@
 name: Vladimir Kostyukov
-description: "Research & Engineering"
+description: "Posts / Slides"
 meta_description: ""
 
 highlighter: rouge
@@ -13,5 +13,5 @@ gems:
 feed:
   path: rss.xml
 
-url: 'http://vkostyukov.net'
+url: 'http://kostyukov.net'
 author: 'Vladimir Kostyukov'

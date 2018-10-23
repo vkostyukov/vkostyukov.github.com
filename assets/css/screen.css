@@ -652,7 +652,7 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .older-posts {
-    right: 0;
+    right: -50px;
 }
 
 .page-number {
@@ -661,7 +661,7 @@ margin on the iframe, cause it breaks stuff. */
 }
 
 .newer-posts {
-    left: 0;
+    left: -50px;
 }
 
 .older-posts:hover,

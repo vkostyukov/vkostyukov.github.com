@@ -18,11 +18,66 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/syntax.css">
     <!-- Customisation  -->
     <link rel="stylesheet" type="text/css" href="/assets/css/main.css" />
+    <style>
+      .footer {
+        border-top: #EBF2F6 1px solid;
+        position: relative;
+        width:80%;
+        max-width: 800px;
+        margin: 4rem auto;
+        padding-bottom: 1rem;
+        word-break: break-word;
+        hyphens: auto;
+        font-size: 16px;
+      }
 
+      .footer .links {
+        float: left;
+      }
+
+      .footer .links ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin-top: 1rem;
+        padding-top: 1rem;
+      }
+
+      .footer .links ul li img {
+        display: inline;
+        width: 24px;
+        height: 24px;
+        vertical-align: middle;
+        margin-right: 4px;
+      }
+
+      .footer .copyright {
+        padding-top: 20px;
+        float: right;
+        text-align: right;
+      }
+    </style>
 </head>
 <body class="home-template">
-
+    <br />
+    <center/>
+      <a href='{{site.url}}/'>[posts]</a> 
+      <a href='{{site.url}}/talks/'>[talks]</a> 
+      <a href='{{site.url}}/resume/'>[resume]</a>
+      <a href="{{site.url}}/rss.xml">[rss]</a>
+    </center>
     {{ content }}
+    <section class="footer">
+      <section class="links">
+        <ul>
+          <li><img src="{{ site.url }}/assets/images/linkedin.png" /><a href="https://www.linkedin.com/in/vkostyukov/">linkedin.com/in/vkostyukov</a></li>
+          <li><img src="{{ site.url }}/assets/images/github.png" /><a href="https://github.com/vkostyukov">github.com/vkostyukov</a></li>
+          <li><img src="{{ site.url }}/assets/images/twitter.png" /><a href="https://twitter.com/vkostyukov">twitter.com/vkostyukov</a></li>
+        </ul>  
+      </section>
+      <section class="copyright">
+          Copyright 2014-2018<br />Vladimir Kostyukov
+      </section>
+    </section>
 
     <script type="text/javascript" src="/assets/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="/assets/js/jquery.fitvids.js"></script>
@@ -37,7 +92,6 @@
 
       ga('create', 'UA-61641022-1', 'auto');
       ga('send', 'pageview');
-
     </script>
 </body>
 </html>
